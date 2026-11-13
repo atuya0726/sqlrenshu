@@ -158,6 +158,40 @@ export const joinTopics: SqlTopic[] = [
         }
       },
       {
+        "heading": "INNER JOINとLEFT JOINの違いを同じ表で比べる",
+        "body": "違いは、結び付く相手がない行を残すかどうかです。INNER JOINをLEFT JOINに変えると、FROMに書いたcustomersの行はすべて残ります。注文のない中央商事も結果に出て、注文IDと金額はNULLになります。INNER JOINの結果は3行、LEFT JOINの結果は4行です。注文のある顧客だけが必要ならINNER JOIN、注文の有無にかかわらず全顧客を出すならLEFT JOINを使います。",
+        "code": "SELECT customers.name, orders.id, orders.amount\nFROM customers\nLEFT JOIN orders\n  ON customers.id = orders.customer_id\nORDER BY customers.id, orders.id;",
+        "resultTable": {
+          "headers": [
+            "name",
+            "id",
+            "amount"
+          ],
+          "rows": [
+            [
+              "青木商店",
+              "101",
+              "12000"
+            ],
+            [
+              "青木商店",
+              "102",
+              "8000"
+            ],
+            [
+              "北野物産",
+              "103",
+              "25000"
+            ],
+            [
+              "中央商事",
+              "NULL",
+              "NULL"
+            ]
+          ]
+        }
+      },
+      {
         "heading": "慣れたらASで表の名前を短くする",
         "body": "ここまでのcustomersをc、ordersをoと短く書くこともできます。FROM customers AS cと書くと、このSQLの中ではcがcustomersの別名になります。下のSQLは最初のSQLと同じ結果です。まずは省略しない形で理解してから、別名を使うと読みやすくなります。",
         "code": "SELECT c.name, o.id, o.amount\nFROM customers AS c\nINNER JOIN orders AS o\n  ON c.id = o.customer_id\nORDER BY o.id;",
