@@ -4,6 +4,8 @@ import SqlPlayground from '@/components/SqlPlayground.astro';
 import ProgressSummary from '@/components/ProgressSummary.astro';
 import { questions } from '@/questions/catalog';
 import { sqlTopics } from '@/data/sqlTopics';
+import { categoryForGuide, groupByPractice } from '@/lib/categories';
+const guideGroups = groupByPractice(sqlTopics, (topic) => categoryForGuide(topic.slug));
 const firstQuestion = questions[0];
 const jsonLd = {
   '@context':'https://schema.org', '@type':'WebSite', name:'SQL練習室', url:new URL('/', Astro.site),
@@ -31,9 +33,9 @@ const jsonLd = {
   </section>
 
   <section class="container-shell border-t border-line py-14">
-    <div class="flex items-baseline justify-between gap-4"><h2 class="text-lg">構文から学ぶ</h2><a class="link focus-ring text-sm" href="/practice/">演習一覧へ</a></div>
-    <ul class="mt-4 divide-y divide-line">
-      {sqlTopics.map((topic) => <li><a href={`/sql/${topic.slug}/`} class="row-link focus-ring group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"><h3 class="shrink-0 group-hover:text-brand">{topic.label} <span class="text-brand">→</span></h3><p class="text-sm text-muted sm:text-right">{topic.lead.slice(0, 60)}…</p></a></li>)}
-    </ul>
+    <div class="flex items-baseline justify-between gap-4"><h2 class="text-lg">構文から学ぶ</h2><span class="flex gap-5 text-sm"><a class="link focus-ring" href="/sql/">ガイド一覧へ</a><a class="link focus-ring" href="/practice/">演習一覧へ</a></span></div>
+    <dl class="mt-4 divide-y divide-line">
+      {guideGroups.map(({ group, items }) => <div class="py-4 sm:flex sm:gap-6"><dt class="shrink-0 text-sm text-muted sm:w-56"><span class="mr-2 font-mono text-xs">{group.stage}</span>{group.title}</dt><dd class="mt-2 flex flex-wrap gap-x-5 gap-y-2 sm:mt-0">{items.map((topic) => <a href={`/sql/${topic.slug}/`} class="link focus-ring">{topic.label}</a>)}</dd></div>)}
+    </dl>
   </section>
 </BaseLayout>

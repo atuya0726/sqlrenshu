@@ -144,7 +144,7 @@ SELECTを参考にした最小形は次のとおり。
 }
 ```
 
-2026-11-13以降に追加する構文は、1構文1ファイルで置く。`src/data/topics/{slug}.ts`が`topic`（SqlTopic）と`fixture`（元の表を作るSQLと表示確認用のSELECT）を、`src/questions/topics/{slug}.ts`が`entries`（`buildExerciseEntries`の結果）をexportすれば、ガイド・演習・テストへ自動で登録される。掲載順とカテゴリ名は`src/lib/categories.ts`の`categoryLabels`・`practiceOrder`・`extraTopicSlugs`に追加し、`src/lib/types.ts`の`QuestionCategory`にもslugを足す。更新系の構文は`extraDmlSlugs`にも加える。
+2026-11-13以降に追加する構文は、1構文1ファイルで置く。`src/data/topics/{slug}.ts`が`topic`（SqlTopic）と`fixture`（元の表を作るSQLと表示確認用のSELECT）を、`src/questions/topics/{slug}.ts`が`entries`（`buildExerciseEntries`の結果）をexportすれば、ガイド・演習・テストへ自動で登録される。掲載順とカテゴリ名は`src/lib/categories.ts`の`categoryLabels`・`practiceOrder`・`extraTopicSlugs`に追加し、`src/lib/types.ts`の`QuestionCategory`にもslugを足す。更新系の構文は`extraDmlSlugs`にも加える。一覧ページの見出しは`practiceGroups`で決まるので、新しいslugはどれかの見出しの`slugs`にも加える（`practiceOrder`と同じ順。`src/lib/categories.test.ts`が漏れを検出する）。
 
 `sqlTopics`へ追加すると、詳細ページ、SQLガイド一覧、トップページ、サイトマップ、パンくず、TechArticle・FAQ構造化データへ自動的に反映される。
 

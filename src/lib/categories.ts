@@ -141,6 +141,49 @@ export const practiceCategories = practiceOrder.map(([slug, description]) => ({
   description,
 }));
 
+// 一覧ページの見出し。practiceOrder の並びを変えずに、連続する範囲へ見出しを付けるだけ（学習パスの順序は変わらない）。
+// slugs は practiceOrder と同じ順で、全カテゴリをちょうど1回ずつ含める（categories.test.ts が検査する）。
+export type PracticeGroup = { id: string; stage: '入門' | '応用'; title: string; slugs: string[] };
+export const practiceGroups: PracticeGroup[] = [
+  { id: 'basics', stage: '入門', title: '基本の検索', slugs: ['select', 'order-by', 'where', 'like'] },
+  { id: 'aggregate', stage: '入門', title: '集計と条件分岐', slugs: ['group-by', 'having', 'case', 'coalesce'] },
+  { id: 'multi-table', stage: '入門', title: '複数の表と段階的な検索', slugs: ['join', 'subquery', 'with', 'union'] },
+  { id: 'date-string', stage: '入門', title: '日付と文字列', slugs: ['date-filter', 'date-trunc', 'string-functions'] },
+  { id: 'beyond', stage: '入門', title: '存在判定・集合演算・ウィンドウ関数', slugs: ['exists', 'intersect-except', 'window-functions'] },
+  { id: 'dml', stage: '入門', title: 'データの更新', slugs: ['insert', 'update', 'delete'] },
+  { id: 'join-advanced', stage: '応用', title: '結合の応用', slugs: ['self-join', 'cross-join', 'full-outer-join'] },
+  { id: 'subquery-advanced', stage: '応用', title: 'サブクエリの応用', slugs: ['not-in', 'any-all', 'correlated-subquery'] },
+  { id: 'values', stage: '応用', title: '件数・型・NULLの扱い', slugs: ['limit-offset', 'cast', 'nullif', 'is-distinct-from'] },
+  { id: 'aggregate-advanced', stage: '応用', title: '再帰と高度な集計', slugs: ['with-recursive', 'rollup', 'string-agg', 'percentile-cont'] },
+  { id: 'window-advanced', stage: '応用', title: 'ウィンドウ関数の応用', slugs: ['lag-lead', 'window-frame', 'ntile'] },
+  { id: 'series-regexp', stage: '応用', title: '日付計算・連番・正規表現', slugs: ['date-arithmetic', 'generate-series', 'regexp'] },
+  { id: 'array-json', stage: '応用', title: '配列とJSON', slugs: ['array', 'jsonb'] },
+  { id: 'dml-advanced', stage: '応用', title: '更新の応用', slugs: ['insert-select', 'update-from', 'delete-using', 'merge'] },
+];
+
+const groupBySlug = new Map(practiceGroups.flatMap((group) => group.slugs.map((slug) => [slug, group] as const)));
+
+/**
+ * 並び順を保ったまま、項目を見出しごとにまとめる。getCategory は演習カテゴリのslugを返す
+ * （ガイドの inner-join / left-join は 'join'）。該当する項目が無い見出しは返さない。
+ */
+export function groupByPractice<T>(items: T[], getCategory: (item: T) => string): { group: PracticeGroup; items: T[] }[] {
+  const result: { group: PracticeGroup; items: T[] }[] = [];
+  const other: PracticeGroup = { id: 'other', stage: '応用', title: 'その他', slugs: [] };
+  for (const item of items) {
+    const group = groupBySlug.get(getCategory(item)) ?? other;
+    const last = result[result.length - 1];
+    if (last?.group === group) last.items.push(item);
+    else result.push({ group, items: [item] });
+  }
+  return result;
+}
+
+/** ガイドのslugから演習カテゴリのslugへ。 */
+export function categoryForGuide(slug: string): string {
+  return slug === 'inner-join' || slug === 'left-join' ? 'join' : slug;
+}
+
 export function guideHrefForCategory(category: string): string {
   return `/sql/${category === 'join' ? 'inner-join' : category}/`;
 }
