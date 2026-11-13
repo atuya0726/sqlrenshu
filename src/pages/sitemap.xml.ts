@@ -7,7 +7,7 @@ export const prerender = true;
 export function GET({ site }: { site?: URL }) {
   const origin = site ?? new URL('https://sqlrenshu.com');
   const paths = [
-    '/', '/practice/', '/postgresql/', '/sql/',
+    '/', '/practice/', '/postgresql/', '/sql/', '/about/', '/privacy/', '/contact/',
     ...sqlTopics.map((topic) => `/sql/${topic.slug}/`),
     ...new Set(questions.map((question) => `/practice/${question.category}/`)),
     ...questions.map((question) => `/practice/${question.category}/${question.id}/`),

@@ -1,0 +1,39 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { questions } from '@/questions/catalog';
+import { sqlTopics } from '@/data/sqlTopics';
+
+const h2 = 'mt-12 text-xl';
+const p = 'mt-4 leading-8';
+const ul = 'mt-4 list-disc space-y-2 pl-6 leading-8';
+---
+<BaseLayout title="運営者情報" description="SQL練習室の運営者情報です。サイトの目的、内容の作り方、運営者、連絡先を掲載しています。">
+  <section class="container-shell py-14">
+    <h1 class="text-3xl">運営者情報</h1>
+
+    <h2 class={h2}>SQL練習室について</h2>
+    <p class={p}>SQL練習室は、ブラウザだけでSQLを書いて試せる無料の学習サイトです。登録もインストールも要りません。問題文を読み、SQLを書いて実行すると、その場で正誤が分かります。</p>
+    <ul class={ul}>
+      <li><a class="link" href="/practice/">SQL練習問題</a>: {questions.length}問。SELECT の基本から、結合、サブクエリ、ウィンドウ関数、再帰まで扱います。</li>
+      <li><a class="link" href="/sql/">SQLガイド</a>: {sqlTopics.length}本。構文ごとに、使う場面と書き方をコード例と実行結果で説明します。</li>
+      <li><a class="link" href="/postgresql/">PostgreSQL固有機能</a>: PostgreSQL だけにある構文の解説です。</li>
+    </ul>
+
+    <h2 class={h2}>内容の作り方</h2>
+    <ul class={ul}>
+      <li>解説は PostgreSQL の公式ドキュメントを基準に書き、各ガイドの末尾に参照したページへのリンクを載せています。</li>
+      <li>練習問題の模範解答は、すべて実際に PostgreSQL で実行して、正解と判定されることを確かめています。</li>
+      <li>誤りを見つけたときは修正します。お気づきの点は<a class="link" href="/contact/">お問い合わせ</a>からお知らせください。</li>
+    </ul>
+
+    <h2 class={h2}>運営者</h2>
+    <dl class="mt-4 divide-y divide-line border-y border-line leading-8">
+      <div class="flex gap-6 py-3"><dt class="w-28 shrink-0 text-muted">サイト名</dt><dd>SQL練習室</dd></div>
+      <div class="flex gap-6 py-3"><dt class="w-28 shrink-0 text-muted">URL</dt><dd>https://sqlrenshu.com/</dd></div>
+      <div class="flex gap-6 py-3"><dt class="w-28 shrink-0 text-muted">運営者</dt><dd>SQL練習室 運営者（個人で運営しています）</dd></div>
+      <div class="flex gap-6 py-3"><dt class="w-28 shrink-0 text-muted">連絡先</dt><dd><a class="link" href="/contact/">お問い合わせ</a></dd></div>
+    </dl>
+
+    <p class="mt-10 leading-8">情報の扱いについては<a class="link" href="/privacy/">プライバシーポリシー</a>をご覧ください。</p>
+  </section>
+</BaseLayout>

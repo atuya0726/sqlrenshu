@@ -1,0 +1,27 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const h2 = 'mt-12 text-xl';
+const p = 'mt-4 leading-8';
+const ul = 'mt-4 list-disc space-y-2 pl-6 leading-8';
+const email = 'nagasunari.it@gmail.com';
+---
+<BaseLayout title="お問い合わせ" description="SQL練習室へのお問い合わせ先です。内容の誤りの指摘、ご意見、ご要望はメールでご連絡ください。">
+  <section class="container-shell py-14">
+    <h1 class="text-3xl">お問い合わせ</h1>
+    <p class={p}>内容の誤り、不具合、ご意見、ご要望は、次のメールアドレスへご連絡ください。</p>
+    <p class="mt-6 text-lg"><a class="link" href={`mailto:${email}?subject=${encodeURIComponent('SQL練習室へのお問い合わせ')}`}>{email}</a></p>
+
+    <h2 class={h2}>誤りや不具合を知らせるとき</h2>
+    <p class={p}>次の内容を書いていただけると、早く確認できます。</p>
+    <ul class={ul}>
+      <li>ページのURL</li>
+      <li>気づいた内容（誤っていると思う箇所、起きた現象）</li>
+      <li>不具合の場合は、入力したSQLと、お使いのブラウザ</li>
+    </ul>
+
+    <h2 class={h2}>返信について</h2>
+    <p class={p}>個人で運営しているため、返信までに日数がかかることがあります。すべてのお問い合わせに返信できるとは限りません。</p>
+    <p class={p}>いただいたメールアドレスと本文は、返信のためだけに使います。詳しくは<a class="link" href="/privacy/">プライバシーポリシー</a>をご覧ください。</p>
+  </section>
+</BaseLayout>
