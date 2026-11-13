@@ -1,0 +1,62 @@
+---
+import '@/styles/global.css';
+import Header from '@/components/Header.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  image?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, canonical, image = '/og-default.png', noindex = false, jsonLd } = Astro.props;
+const canonicalUrl = new URL(canonical ?? Astro.url.pathname, Astro.site);
+const imageUrl = new URL(image, Astro.site);
+// Cloudflare Web Analyticsのトークン。未設定ならタグを出さない（Cookieは使わない計測）。
+const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+const pageTitle = title.includes('SQL練習室') ? title : `${title}｜SQL練習室`;
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:site_name" content="SQL練習室" />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <title>{pageTitle}</title>
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {analyticsToken && <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analyticsToken })}></script>}
+  </head>
+  <body>
+    <Header />
+    <main><slot /></main>
+    <footer class="mt-24 border-t border-line py-8 text-sm text-muted">
+      <div class="workspace-shell flex flex-col justify-between gap-2 sm:flex-row">
+        <p>SQL練習室 — 入力したSQLはこの端末だけに保存します。</p>
+        <p>登録・ログイン・個人情報の保存はありません。</p>
+      </div>
+      <nav aria-label="フッターナビゲーション" class="workspace-shell mt-4 flex flex-wrap gap-x-5 gap-y-2">
+        <a class="focus-ring hover:text-ink" href="/sql/">SQLガイド</a>
+        <a class="focus-ring hover:text-ink" href="/practice/">SQL練習問題</a>
+        <a class="focus-ring hover:text-ink" href="/postgresql/">PostgreSQL固有機能</a>
+      </nav>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#eff4ec"/>
+  <rect x="72" y="72" width="104" height="104" rx="24" fill="#176b46"/>
+  <text x="124" y="137" text-anchor="middle" font-family="monospace" font-size="32" font-weight="700" fill="white">SQL</text>
+  <text x="72" y="300" font-family="sans-serif" font-size="72" font-weight="800" fill="#17211b">SQL練習室</text>
+  <text x="72" y="390" font-family="sans-serif" font-size="40" font-weight="700" fill="#176b46">登録不要のSQL練習問題。</text>
+  <text x="72" y="470" font-family="sans-serif" font-size="30" fill="#637069">ブラウザだけでPostgreSQLを実行。</text>
+  <rect x="72" y="520" width="1056" height="8" rx="4" fill="#d8f36b"/>
+</svg>

@@ -1,0 +1,12 @@
+---
+import { affiliateOffers } from '@/lib/affiliateOffers';
+const { id } = Astro.props;
+const offer = affiliateOffers[id];
+if (!offer) throw new Error(`Unknown affiliate offer: ${id}`);
+---
+<aside class="text-sm">
+  <p class="text-muted">Book guide</p>
+  <h3 class="mt-2">{offer.title}</h3>
+  <p class="mt-2 leading-6 text-muted">{offer.description}</p>
+  {offer.status === 'active' && offer.url && <a href={offer.url} rel="sponsored noreferrer" class="link mt-3 inline-block">Amazonで見る →</a>}
+</aside>

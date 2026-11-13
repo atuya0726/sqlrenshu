@@ -1,0 +1,493 @@
+---
+import type { Question } from '@/lib/types';
+import CodeBlock from './CodeBlock.astro';
+import { categoryLabels } from '@/lib/categories';
+
+interface Props { question: Question; compact?: boolean; nextHref?: string; nextLabel?: string; guideHref?: string }
+const { question, compact = false, nextHref, nextLabel = '次の問題へ', guideHref } = Astro.props;
+
+// 正解時の共有リンク。トップページに埋め込んだ場合も、問題ページのURLを共有する。
+const shareUrl = new URL(`/practice/${question.category}/${question.id}/`, Astro.site ?? 'https://sqlrenshu.com');
+const shareText = `SQL練習室で「${question.title}」（${categoryLabels[question.category] ?? question.category}）を解きました`;
+const shareHref = `https://twitter.com/intent/tweet?${new URLSearchParams({ text: shareText, url: shareUrl.href, hashtags: 'SQL' })}`;
+
+const splitIdentifiers = (text: string) => text.split(/([A-Za-z_][A-Za-z0-9_]+)/g);
+---
+<sql-playground class="block" data-question-id={question.id}>
+  <script is:inline type="application/json" data-question-json set:html={JSON.stringify(question).replace(/</g, '\\u003c')} />
+  <section>
+    <header>
+      <h2 class="text-sm text-muted">{question.title}</h2>
+      <p class="mt-2 max-w-3xl text-xl font-medium leading-9">{splitIdentifiers(question.description).map((part, i) => i % 2 === 1 ? <code class="font-mono text-brand">{part}</code> : part)}</p>
+      {question.requirements && question.requirements.length > 0 && <div class="mt-4 text-sm leading-7 text-muted">
+        <p class="font-medium">この問題の要件</p>
+        <ul class="mt-1 list-disc space-y-1 pl-5">{question.requirements.map((requirement) => <li>{requirement}</li>)}</ul>
+      </div>}
+    </header>
+
+    <div class="mt-6 overflow-hidden rounded-xl border border-line shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_rgba(0,0,0,0.07)]" aria-label="SQLエディタ">
+      <div class="flex flex-wrap items-center justify-end gap-3 border-b border-line bg-[#fafaf9] px-4 py-2.5">
+        <span class="hidden text-xs text-muted sm:inline">⌘ / Ctrl + Enter</span>
+        <button data-run disabled class="btn btn-sm focus-ring disabled:cursor-wait disabled:opacity-50">
+          <span data-run-label>準備中…</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,3fr)_minmax(6.5rem,1fr)]">
+        <div id={`editor-${question.id}`} data-editor class="min-h-72 min-w-0"></div>
+
+        <section class="min-w-0 border-t border-line bg-[#fafaf9] sm:border-t-0 sm:border-l" aria-labelledby={`tables-title-${question.id}`}>
+          <div class="border-b border-line px-3 py-2">
+            <h3 id={`tables-title-${question.id}`} class="truncate text-xs text-muted">テーブル</h3>
+          </div>
+          <div data-table-explorer class="min-h-72 space-y-4 p-3" aria-live="polite">
+            <p class="flex items-center gap-2 text-xs text-muted">
+              <span class="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-line border-t-brand" aria-hidden="true"></span>
+              読み込み中…
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div class="min-h-32 border-t border-line p-4 sm:p-5">
+        <p data-feedback class="mb-4 hidden text-sm" role="status" aria-live="polite"></p>
+        <div data-solved-actions class="mb-5 flex flex-wrap items-center gap-x-5 gap-y-3" hidden>
+          {nextHref && <a href={nextHref} class="btn btn-sm focus-ring">{nextLabel} →</a>}
+          <a href={shareHref} target="_blank" rel="noopener noreferrer" class="link focus-ring text-sm">Xで共有する</a>
+        </div>
+        <section aria-labelledby={`result-title-${question.id}`}>
+          <div class="flex items-center justify-between gap-3">
+            <h3 id={`result-title-${question.id}`} class="text-sm text-muted">実行結果</h3>
+            <span data-result-count class="text-xs text-muted"></span>
+          </div>
+          <div data-result class="mt-2 overflow-x-auto"></div>
+        </section>
+      </div>
+    </div>
+
+    <aside class="mt-6">
+      <details>
+        <summary class="focus-ring cursor-pointer text-sm text-brand">ヒント</summary>
+        <ol class="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-muted">{question.hints.map((hint) => <li>{hint}</li>)}</ol>
+      </details>
+      <details class="mt-4" data-explanation>
+        <summary class="focus-ring cursor-pointer text-sm text-brand">解説・解答例</summary>
+        <p class="mt-3 text-sm leading-7 text-muted">{question.explanation}</p>
+        <div class="mt-3"><CodeBlock code={question.solutionSql} /></div>
+      </details>
+      {guideHref && <p class="mt-4"><a class="link focus-ring text-sm" href={guideHref}>構文の解説を読む →</a></p>}
+      {nextHref && <p class="mt-6 text-right"><a href={nextHref} class="btn focus-ring">{nextLabel} →</a></p>}
+    </aside>
+  </section>
+</sql-playground>
+
+<script>
+  import { Compartment, EditorState } from '@codemirror/state';
+  import { acceptCompletion, autocompletion, selectedCompletion } from '@codemirror/autocomplete';
+  import type { CompletionContext } from '@codemirror/autocomplete';
+  import { Decoration, EditorView, keymap, lineNumbers, highlightActiveLine, highlightSpecialChars, drawSelection, placeholder, ViewPlugin, WidgetType } from '@codemirror/view';
+  import { defaultKeymap, indentWithTab } from '@codemirror/commands';
+  import { bracketMatching, defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language';
+  import { sql, PostgreSQL } from '@codemirror/lang-sql';
+  import { QuestionDatabase, readablePostgresError } from '@/lib/pglite';
+  import { gradeResult } from '@/lib/grader';
+  import { loadProgress, markSolved, saveDraft } from '@/lib/progress';
+  import type { Question } from '@/lib/types';
+  import type { TableSnapshot } from '@/lib/pglite';
+
+  const sqlCompletionPriority: Record<string, number> = {
+    SELECT: 99,
+    FROM: 98,
+    WHERE: 97,
+    JOIN: 96,
+    ON: 95,
+    GROUP: 94,
+    HAVING: 93,
+    ORDER: 92,
+    DISTINCT: 91,
+    AS: 90,
+    WITH: 89,
+    INNER: 88,
+    LEFT: 87,
+    RIGHT: 86,
+    FULL: 85,
+    LIMIT: 84,
+    OFFSET: 83,
+    UNION: 82,
+    EXISTS: 81,
+    CASE: 80,
+    WHEN: 79,
+    THEN: 78,
+    ELSE: 77,
+    END: 76,
+    AND: 75,
+    OR: 74,
+    NOT: 73,
+    IS: 72,
+    NULL: 71,
+    COUNT: 70,
+    SUM: 69,
+    AVG: 68,
+    MAX: 67,
+    MIN: 66,
+    OVER: 65,
+    PARTITION: 64,
+    ROW_NUMBER: 63,
+    RANK: 62,
+    DENSE_RANK: 61,
+    LAG: 60,
+    LEAD: 59,
+    INSERT: 58,
+    UPDATE: 57,
+    DELETE: 56,
+    CREATE: 55,
+    ALTER: 54,
+    DROP: 53,
+  };
+
+  const sqlKeywordCompletion = (label: string, type: string) => ({
+    label,
+    type,
+    boost: sqlCompletionPriority[label] ?? -1,
+  });
+
+  const sqlPhraseCompletion = (context: CompletionContext) => {
+    const word = context.matchBefore(/[A-Za-z_]*/);
+    if (!word || (word.from === word.to && !context.explicit)) return null;
+    return {
+      from: word.from,
+      options: [
+        { label: 'ORDER BY', type: 'keyword', boost: 100 },
+        { label: 'ASC', type: 'keyword', boost: 99 },
+        { label: 'DESC', type: 'keyword', boost: 98 },
+      ],
+      validFor: /^[A-Za-z_]*$/,
+    };
+  };
+
+  class InlineCompletionWidget extends WidgetType {
+    constructor(private text: string) { super(); }
+
+    eq(other: InlineCompletionWidget) { return this.text === other.text; }
+
+    toDOM() {
+      const span = document.createElement('span');
+      span.className = 'cm-inline-completion';
+      span.textContent = this.text;
+      return span;
+    }
+
+    ignoreEvent() { return true; }
+  }
+
+  const inlineCompletion = ViewPlugin.fromClass(class {
+    decorations;
+
+    constructor(view: EditorView) {
+      this.decorations = this.build(view);
+    }
+
+    update(update: { view: EditorView }) {
+      this.decorations = this.build(update.view);
+    }
+
+    private build(view: EditorView) {
+      const selection = view.state.selection.main;
+      if (!selection.empty || !view.hasFocus) return Decoration.none;
+
+      const beforeCursor = view.state.sliceDoc(Math.max(0, selection.head - 100), selection.head);
+      const word = beforeCursor.match(/[A-Za-z_][A-Za-z0-9_]*$/)?.[0];
+      const completion = selectedCompletion(view.state);
+      if (!word || !completion || completion.label.length <= word.length) return Decoration.none;
+      if (!completion.label.toLowerCase().startsWith(word.toLowerCase())) return Decoration.none;
+
+      return Decoration.set([
+        Decoration.widget({
+          widget: new InlineCompletionWidget(completion.label.slice(word.length)),
+          side: 1,
+        }).range(selection.head),
+      ]);
+    }
+  }, { decorations: (value) => value.decorations });
+
+  class SqlPlaygroundElement extends HTMLElement {
+    private question!: Question;
+    private editor!: EditorView;
+    private database!: QuestionDatabase;
+    private sqlLanguage = new Compartment();
+    private saveTimer?: number;
+    private ready = false;
+    private executing = false;
+    private connected = false;
+    private started = false;
+    private visibilityObserver?: IntersectionObserver;
+
+    // PGlite（wasmとデータで十数MB）は、エディタが画面に近づくか操作されるまで読み込まない。
+    private start() {
+      if (this.started) return;
+      this.started = true;
+      this.visibilityObserver?.disconnect();
+      void this.initialize();
+    }
+
+    connectedCallback() {
+      if (this.connected) return;
+      this.connected = true;
+      const json = this.querySelector<HTMLScriptElement>('[data-question-json]')?.textContent;
+      if (!json) return;
+      this.question = JSON.parse(json) as Question;
+      this.database = new QuestionDatabase();
+      const saved = loadProgress().lastSqlByQuestion[this.question.id];
+      const initialSql = saved ?? this.question.starterSql ?? '';
+      const run = () => { void this.execute(); return true; };
+      this.editor = new EditorView({
+        parent: this.querySelector<HTMLElement>('[data-editor]')!,
+        state: EditorState.create({
+          doc: initialSql,
+          extensions: [
+            lineNumbers(),
+            highlightActiveLine(),
+            highlightSpecialChars(),
+            drawSelection(),
+            bracketMatching(),
+            syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+            this.sqlLanguage.of(sql({
+              dialect: PostgreSQL,
+              upperCaseKeywords: true,
+              keywordCompletion: sqlKeywordCompletion,
+            })),
+            EditorState.languageData.of(() => [{ autocomplete: sqlPhraseCompletion }]),
+            autocompletion({
+              activateOnTyping: true,
+              activateOnTypingDelay: 0,
+              defaultKeymap: false,
+              maxRenderedOptions: 1,
+              selectOnOpen: true,
+            }),
+            inlineCompletion,
+            placeholder('SELECT...'),
+            keymap.of([{ key:'Mod-Enter', run }, { key:'Tab', run: acceptCompletion }, indentWithTab, ...defaultKeymap]),
+            EditorView.lineWrapping,
+            EditorView.theme({
+              '&': { fontSize:'14px', minHeight:'18rem' },
+              '.cm-scroller': { fontFamily:'var(--font-mono)', lineHeight:'1.65' },
+              '.cm-content': { padding:'14px 4px' },
+              '&.cm-focused': { outline:'none' },
+            }),
+            EditorView.updateListener.of((update) => {
+              if (!update.docChanged) return;
+              window.clearTimeout(this.saveTimer);
+              this.saveTimer = window.setTimeout(() => saveDraft(this.question.id, update.state.doc.toString()), 500);
+            }),
+          ],
+        }),
+      });
+      this.querySelector<HTMLElement>('[data-editor]')?.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.cm-content')) this.editor.focus();
+      });
+      this.querySelector('[data-run]')?.addEventListener('click', () => {
+        if (this.ready) void this.execute();
+        else void this.retryInitialize();
+      });
+      this.addEventListener('focusin', () => this.start(), { once: true });
+      this.addEventListener('pointerdown', () => this.start(), { once: true });
+      if ('IntersectionObserver' in window) {
+        this.visibilityObserver = new IntersectionObserver((entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) this.start();
+        }, { rootMargin: '300px 0px' });
+        this.visibilityObserver.observe(this);
+      } else {
+        this.start();
+      }
+    }
+
+    disconnectedCallback() {
+      this.connected = false;
+      this.ready = false;
+      this.started = false;
+      this.visibilityObserver?.disconnect();
+      window.clearTimeout(this.saveTimer);
+      this.editor?.destroy();
+      this.database.terminate();
+    }
+
+    private buttons(disabled: boolean) {
+      this.querySelectorAll<HTMLButtonElement>('[data-run]').forEach((button) => { button.disabled = disabled; });
+    }
+
+    private async initialize() {
+      try {
+        await this.database.initialize(this.question.setupSql);
+        await this.renderTableExplorer();
+        this.ready = true;
+        this.setRunLabel('実行');
+        this.buttons(false);
+      } catch (error) {
+        this.setRunLabel('再試行');
+        this.buttons(false);
+        this.showFeedback(false, `問題データベースを準備できませんでした: ${readablePostgresError(error)} 再試行してください。`);
+      }
+    }
+
+    private async retryInitialize() {
+      this.buttons(true);
+      this.setRunLabel('準備中…');
+      this.database.terminate();
+      this.database = new QuestionDatabase();
+      await this.initialize();
+    }
+
+    private async execute() {
+      if (!this.ready) {
+        this.start();
+        return this.showFeedback(null, 'PostgreSQLを準備しています。少し待ってから実行してください。');
+      }
+      if (this.executing) return;
+      const query = this.editor.state.doc.toString().trim();
+      if (!query) return this.showFeedback(false, 'SQLを入力してください。');
+      this.executing = true;
+      this.setRunLabel('実行中…');
+      this.buttons(true);
+      this.showFeedback(null, 'PostgreSQLで実行しています…');
+      try {
+        await this.database.reset();
+        const userResult = await this.database.execute(query);
+        const resultToGrade = this.question.grading.mode === 'table-state' && this.question.grading.stateQuery
+          ? await this.database.execute(this.question.grading.stateQuery)
+          : userResult;
+        // table-stateは更新後のテーブルを実行結果欄に表示する（INSERT・UPDATE・DELETEは結果セットを返さないため）。
+        this.renderResult(resultToGrade, resultToGrade === userResult ? undefined : '更新後');
+        const grade = gradeResult(resultToGrade, this.question.expectedResult, this.question.grading);
+        this.showFeedback(grade.correct, [grade.message, grade.details].filter(Boolean).join(' '));
+        if (grade.correct) markSolved(this.question.id);
+        const solvedActions = this.querySelector<HTMLElement>('[data-solved-actions]');
+        if (solvedActions) solvedActions.hidden = !grade.correct;
+        saveDraft(this.question.id, query);
+        await this.renderTableExplorer();
+      } catch (error) {
+        this.renderError(readablePostgresError(error));
+        this.showFeedback(false, 'SQLを実行できませんでした。エラー内容を確認してください。');
+        saveDraft(this.question.id, query);
+      } finally {
+        this.executing = false;
+        this.setRunLabel('実行');
+        this.buttons(false);
+      }
+    }
+
+    private showFeedback(correct: boolean | null, message: string) {
+      const target = this.querySelector<HTMLElement>('[data-feedback]');
+      if (!target) return;
+      target.classList.remove('hidden','text-brand','text-bad','text-muted');
+      target.classList.add(correct === true ? 'text-brand' : correct === false ? 'text-bad' : 'text-muted');
+      target.textContent = message;
+    }
+
+    private setRunLabel(label: string) {
+      const target = this.querySelector<HTMLElement>('[data-run-label]');
+      if (target) target.textContent = label;
+    }
+
+    private renderResult(result: { columns: string[]; rows: Record<string, unknown>[]; affectedRows?: number }, label?: string) {
+      const container = this.querySelector<HTMLElement>('[data-result]');
+      const count = this.querySelector('[data-result-count]');
+      if (!container || !count) return;
+      container.replaceChildren();
+      count.textContent = result.columns.length ? `${label ? `${label}：` : ''}${result.rows.length}行` : `${result.affectedRows ?? 0}行を変更`;
+      if (!result.columns.length) {
+        const p = document.createElement('p'); p.className = 'p-5 text-sm text-muted'; p.textContent = 'SQLを実行しました。結果セットはありません。'; container.append(p); return;
+      }
+      const table = document.createElement('table'); table.className = 'w-full border-collapse text-left text-sm';
+      const thead = table.createTHead(); const headRow = thead.insertRow();
+      result.columns.forEach((column) => { const th = document.createElement('th'); th.className = 'border-b border-line px-3 py-2 text-muted'; th.textContent = column; headRow.append(th); });
+      const tbody = table.createTBody();
+      result.rows.forEach((row) => { const tr = tbody.insertRow(); result.columns.forEach((column) => { const td = tr.insertCell(); td.className = 'whitespace-pre-wrap border-b border-line px-3 py-2 font-mono text-xs'; const value = row[column]; td.textContent = value === null ? 'NULL' : value === '' ? "''（空文字）" : value instanceof Date ? value.toISOString().slice(0,10) : Array.isArray(value) ? `{${value.map((item) => item === null ? 'NULL' : typeof item === 'object' ? JSON.stringify(item) : String(item)).join(',')}}` : typeof value === 'object' ? JSON.stringify(value) : String(value); if (value === null) td.classList.add('italic','text-muted'); }); });
+      container.append(table);
+    }
+
+    private renderError(message: string) {
+      const container = this.querySelector<HTMLElement>('[data-result]');
+      const count = this.querySelector('[data-result-count]');
+      if (count) count.textContent = 'PostgreSQL error';
+      if (container) { const pre = document.createElement('pre'); pre.className = 'whitespace-pre-wrap p-4 text-sm text-bad'; pre.textContent = message; container.replaceChildren(pre); }
+    }
+
+    private async renderTableExplorer() {
+      const container = this.querySelector<HTMLElement>('[data-table-explorer]');
+      if (!container) return;
+      try {
+        const tables = await this.database.inspectTables();
+        this.configureSqlCompletion(tables);
+        container.replaceChildren(...tables.map((table) => this.createTablePanel(table)));
+      } catch (error) {
+        const message = document.createElement('p');
+        message.className = 'p-3 text-sm text-bad';
+        message.textContent = `テーブルを表示できませんでした: ${readablePostgresError(error)}`;
+        container.replaceChildren(message);
+      }
+    }
+
+    private configureSqlCompletion(tables: TableSnapshot[]) {
+      const schema = Object.fromEntries(
+        tables.map((table) => [table.name, {
+          self: { label: table.name, type: 'class', detail: 'TABLE' },
+          children: table.columns.map((column) => ({
+            label: column.name,
+            type: 'property',
+            detail: table.name,
+          })),
+        }]),
+      );
+      this.editor.dispatch({
+        effects: this.sqlLanguage.reconfigure(sql({
+          dialect: PostgreSQL,
+          schema,
+          defaultTable: tables.length === 1 ? tables[0].name : undefined,
+          upperCaseKeywords: true,
+          keywordCompletion: sqlKeywordCompletion,
+        })),
+      });
+    }
+
+    private createTablePanel(table: TableSnapshot): HTMLElement {
+      const panel = document.createElement('article');
+
+      const name = document.createElement('h4');
+      name.className = 'break-words font-mono text-sm font-semibold text-ink';
+      name.textContent = table.name;
+
+      const list = document.createElement('ul');
+      list.className = 'mt-2 space-y-1 border-l border-line pl-3';
+      table.columns.forEach((column) => {
+        const item = document.createElement('li');
+        item.className = 'break-words font-mono text-xs text-muted';
+        item.textContent = column.name;
+        list.append(item);
+      });
+
+      panel.append(name, list);
+      return panel;
+    }
+  }
+  if (!customElements.get('sql-playground')) customElements.define('sql-playground', SqlPlaygroundElement);
+</script>
+
+<style is:global>
+  sql-playground .cm-tooltip.cm-tooltip-autocomplete {
+    display: none;
+  }
+  sql-playground .cm-inline-completion {
+    color: #9aa69f;
+    opacity: .72;
+    pointer-events: none;
+  }
+  sql-playground .cm-placeholder {
+    color: #a8a8a6;
+    font-style: normal;
+  }
+  sql-playground [data-editor],
+  sql-playground [data-editor] .cm-scroller {
+    cursor: text;
+  }
+</style>

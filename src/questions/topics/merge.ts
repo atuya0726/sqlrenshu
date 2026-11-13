@@ -1,0 +1,111 @@
+import { buildExerciseEntries } from '../exerciseEntries';
+
+const setup = "CREATE TABLE products (id integer PRIMARY KEY, name text NOT NULL, stock integer NOT NULL);\nINSERT INTO products VALUES (1,'ノート',50),(2,'ペン',100),(3,'消しゴム',0),(4,'定規',30);\nCREATE TABLE arrivals (id integer PRIMARY KEY, name text NOT NULL, qty integer NOT NULL);\nINSERT INTO arrivals VALUES (2,'ペン',20),(3,'消しゴム',40),(4,'定規',0),(5,'付箋',60);";
+const stateQuery = 'SELECT * FROM products ORDER BY id';
+const columns = ['id', 'name', 'stock'];
+const using = "USING arrivals ON products.id = arrivals.id";
+const ins = "INSERT (id, name, stock) VALUES (arrivals.id, arrivals.name, arrivals.qty)";
+
+export const entries = buildExerciseEntries({
+  category: 'merge',
+  tags: ['MERGE', 'WHEN MATCHED', 'WHEN NOT MATCHED', 'UPSERT'],
+  setup,
+  stateQuery,
+  exercises: [
+    {
+      slug: 'merge-basic',
+      title: 'MERGE',
+      description: 'arrivals（入荷データ）をproductsに反映してください。idが一致する商品は在庫に入荷数（qty）を足し、一致しない商品はproductsに追加します（stockは入荷数）。1つのMERGE文で書きます。',
+      sql: `MERGE INTO products\n${using.replace(' ON', '\n  ON')}\nWHEN MATCHED THEN\n  UPDATE SET stock = products.stock + arrivals.qty\nWHEN NOT MATCHED THEN\n  ${ins};`,
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 120], [3, '消しゴム', 40], [4, '定規', 30], [5, '付箋', 60]],
+      hint: 'WHEN MATCHED THEN UPDATE と WHEN NOT MATCHED THEN INSERT の2つを書きます。',
+      explanation: 'ペンは100+20で120、消しゴムは0+40で40、定規は0を足して30のままです。productsにない付箋は在庫60で追加されます。ノートは入荷に含まれないので変わりません。実行後の表の内容が採点されます。',
+      starter: `MERGE INTO products\nUSING arrivals ON products.id = arrivals.id\nWHEN MATCHED THEN\n  UPDATE SET \nWHEN NOT MATCHED THEN\n  INSERT ;`,
+    },
+    {
+      slug: 'matched-only',
+      title: 'WHEN MATCHED THEN UPDATE',
+      description: 'arrivalsの入荷数を、productsに既にある商品の在庫へ足してください。productsにない商品は追加しません。',
+      sql: `MERGE INTO products\n${using.replace(' ON', '\n  ON')}\nWHEN MATCHED THEN\n  UPDATE SET stock = products.stock + arrivals.qty;`,
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 120], [3, '消しゴム', 40], [4, '定規', 30]],
+      hint: 'WHEN NOT MATCHED を書かなければ、一致しない行は何もされません。',
+      explanation: 'ペンと消しゴムの在庫が増え、定規は0を足して30のままです。付箋はproductsにないので追加されず、4行のままです。',
+    },
+    {
+      slug: 'not-matched-only',
+      title: 'WHEN NOT MATCHED THEN INSERT',
+      description: 'arrivalsのうち、productsにまだない商品だけをproductsへ追加してください（stockは入荷数）。既にある商品の在庫は変更しません。',
+      sql: `MERGE INTO products\n${using.replace(' ON', '\n  ON')}\nWHEN NOT MATCHED THEN\n  ${ins};`,
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 100], [3, '消しゴム', 0], [4, '定規', 30], [5, '付箋', 60]],
+      hint: 'WHEN MATCHED を書かず、WHEN NOT MATCHED THEN INSERT だけを書きます。',
+      explanation: '付箋だけが在庫60で追加されます。ペンの在庫は100のまま、消しゴムも0のままです。',
+    },
+    {
+      slug: 'conditional-when',
+      title: '条件つきのWHEN MATCHED',
+      description: 'arrivalsを反映してください。一致した商品のうち、現在の在庫が0のものだけ、在庫を入荷数（qty）に更新します。在庫が0でない商品は変更せず、productsにない商品は追加します。',
+      sql: `MERGE INTO products\n${using.replace(' ON', '\n  ON')}\nWHEN MATCHED AND products.stock = 0 THEN\n  UPDATE SET stock = arrivals.qty\nWHEN NOT MATCHED THEN\n  ${ins};`,
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 100], [3, '消しゴム', 40], [4, '定規', 30], [5, '付箋', 60]],
+      hint: 'WHEN MATCHED AND の後に、更新する表の stock を使った条件を書きます。',
+      explanation: '在庫が0なのは消しゴムだけなので、40になります。ペン（在庫100）と定規（在庫30）は一致しても条件に合わず、そのまま残ります。付箋は追加されます。',
+    },
+    {
+      slug: 'matched-delete',
+      title: 'WHEN MATCHED THEN DELETE',
+      description: 'arrivalsを反映してください。入荷数（qty）が0の商品はproductsから削除し、それ以外の一致した商品は在庫に入荷数を足し、productsにない商品は追加します。',
+      sql: `MERGE INTO products\n${using.replace(' ON', '\n  ON')}\nWHEN MATCHED AND arrivals.qty = 0 THEN\n  DELETE\nWHEN MATCHED THEN\n  UPDATE SET stock = products.stock + arrivals.qty\nWHEN NOT MATCHED THEN\n  ${ins};`,
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 120], [3, '消しゴム', 40], [5, '付箋', 60]],
+      hint: 'WHENは書いた順に調べられます。DELETEの条件つきWHENを、条件のない更新より先に書きます。',
+      explanation: '定規は入荷数が0なので削除されます。条件のないUPDATEを先に書くと後ろのDELETEに届かずエラーになるため、DELETEを先に書きます。ペンは120、消しゴムは40、付箋は追加されます。',
+    },
+    {
+      slug: 'on-conflict-upsert',
+      title: 'INSERT ... ON CONFLICT',
+      description: 'MERGEではなく INSERT ... ON CONFLICT を使って、arrivalsをproductsへ反映してください。idが重複する商品は在庫に入荷数を足し、重複しない商品は追加します。',
+      sql: "INSERT INTO products (id, name, stock)\nSELECT id, name, qty FROM arrivals\nON CONFLICT (id) DO UPDATE\n  SET stock = products.stock + EXCLUDED.stock;",
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 120], [3, '消しゴム', 40], [4, '定規', 30], [5, '付箋', 60]],
+      hint: 'ON CONFLICT (id) DO UPDATE で、追加しようとした値は EXCLUDED で参照します。',
+      explanation: 'idが重複するペン・消しゴム・定規は更新側へ進み、在庫に入荷数が加わります。重複しない付箋は追加されます。結果はMERGEの基本の問題と同じです。',
+    },
+    {
+      slug: 'chapter-review-arrival-rules',
+      title: '章末問題：MERGE・UPDATE・INSERT・DELETEの条件分岐',
+      description: 'arrivalsを次のルールで反映してください。(1) 入荷数が0の商品は、一致していればproductsから削除する。(2) 現在の在庫が0の商品は、在庫を入荷数にする。(3) それ以外の一致した商品は、在庫に入荷数を足す。(4) productsにない商品は、入荷数が1以上のものだけ追加する。',
+      sql: "MERGE INTO products\nUSING arrivals ON products.id = arrivals.id\nWHEN MATCHED AND arrivals.qty = 0 THEN\n  DELETE\nWHEN MATCHED AND products.stock = 0 THEN\n  UPDATE SET stock = arrivals.qty\nWHEN MATCHED THEN\n  UPDATE SET stock = products.stock + arrivals.qty\nWHEN NOT MATCHED AND arrivals.qty >= 1 THEN\n  INSERT (id, name, stock) VALUES (arrivals.id, arrivals.name, arrivals.qty);",
+      setup: setup + "\nINSERT INTO products VALUES (6,'テープ',0);\nINSERT INTO arrivals VALUES (6,'テープ',0),(7,'クリップ',0),(8,'のり',15);",
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 120], [3, '消しゴム', 40], [5, '付箋', 60], [8, 'のり', 15]],
+      hint: '一致した行は、削除・在庫0の更新・通常の更新の順に、条件の厳しいWHENから書きます。追加側のWHENにも条件を付けます。',
+      explanation: '定規（入荷0・在庫30）とテープ（入荷0・在庫0）は、入荷数0の削除が先に当たるので両方削除されます。消しゴムは在庫0なので入荷数40になり、ペンは100+20で120です。クリップは入荷0なので追加されず、付箋とのりは入荷1以上なので追加されます。',
+      review: 'chapter review',
+      requirements: [
+        '入荷数が0の一致した商品をDELETEで削除する',
+        '在庫が0の商品と、それ以外の一致した商品の更新をWHENの順で書き分ける',
+        '追加するWHEN NOT MATCHEDにも入荷数の条件を付ける',
+      ],
+    },
+    {
+      slug: 'cumulative-review-aggregated-log',
+      title: 'まとめ問題：MERGE・GROUP BY・WHERE・SUM',
+      description: '入荷記録 arrival_log（1商品に複数行あります）のうち、受入済み（received が true）の行だけを商品ごとの入荷数合計にまとめ、productsへ反映してください。一致する商品は在庫に合計を足し、productsにない商品は追加します。未受入の行は反映しません。',
+      setup: "CREATE TABLE products (id integer PRIMARY KEY, name text NOT NULL, stock integer NOT NULL);\nINSERT INTO products VALUES (1,'ノート',50),(2,'ペン',100),(3,'消しゴム',0),(4,'定規',30);\nCREATE TABLE arrival_log (log_id integer PRIMARY KEY, product_id integer NOT NULL, name text NOT NULL, qty integer NOT NULL, received boolean NOT NULL);\nINSERT INTO arrival_log VALUES (1,2,'ペン',20,true),(2,2,'ペン',10,true),(3,3,'消しゴム',40,false),(4,5,'付箋',30,true),(5,5,'付箋',25,true),(6,5,'付箋',100,false);",
+      sql: "MERGE INTO products\nUSING (\n  SELECT product_id, name, SUM(qty) AS total_qty\n  FROM arrival_log\n  WHERE received\n  GROUP BY product_id, name\n) AS a ON products.id = a.product_id\nWHEN MATCHED THEN\n  UPDATE SET stock = products.stock + a.total_qty\nWHEN NOT MATCHED THEN\n  INSERT (id, name, stock) VALUES (a.product_id, a.name, a.total_qty);",
+      columns,
+      rows: [[1, 'ノート', 50], [2, 'ペン', 130], [3, '消しゴム', 0], [4, '定規', 30], [5, '付箋', 55]],
+      hint: 'USINGにWHEREとGROUP BYをつけたSELECTを書いて、商品ごとに1行へまとめます。',
+      explanation: 'ペンの受入済みは20と10の合計30なので100+30で130です。消しゴムの40は未受入なので反映されず0のままです。付箋は受入済み30と25の合計55で追加され、未受入の100は含めません。集計せずに記録の表を直接USINGにすると、ペンや付箋が複数行と一致してエラーになります。',
+      review: 'cumulative review',
+      requirements: [
+        'WHEREで受入済みの記録だけを選ぶ',
+        'GROUP BYとSUMで商品ごとの入荷数合計に集計し、USINGに置く',
+        '一致した商品は在庫へ加算し、ない商品は追加する',
+      ],
+    },
+  ],
+});

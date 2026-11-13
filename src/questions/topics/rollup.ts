@@ -1,0 +1,87 @@
+import { buildExerciseEntries } from '../exerciseEntries';
+
+const setup = `CREATE TABLE sales (id integer PRIMARY KEY, region text NOT NULL, category text, amount integer NOT NULL);
+INSERT INTO sales VALUES (1,'東','食品',1200),(2,'東','食品',800),(3,'東','雑貨',500),(4,'西','食品',1500),(5,'西','雑貨',700),(6,'西','雑貨',300),(7,'西',NULL,400),(8,'北','食品',600);`;
+
+export const entries = buildExerciseEntries({
+  category: 'rollup',
+  tags: ['ROLLUP', 'CUBE', 'GROUPING SETS'],
+  setup,
+  exercises: [
+    {
+      slug: 'rollup-total', title: 'ROLLUP',
+      description: '売上（sales）を地域（region）ごとに合計し、全体の総計の行も加えて、regionと合計金額をこの順に取得してください。総計の行のregionはNULLのままで構いません。行順は問いません。',
+      sql: 'SELECT region, SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region);',
+      columns: ['region', 'sum'], rows: [['東', 2500], ['西', 2900], ['北', 600], [null, 6000]],
+      hint: 'GROUP BYのあとにROLLUPを書き、地域の列をカッコに入れます。',
+      explanation: '東が1,200 + 800 + 500 = 2,500円、西が1,500 + 700 + 300 + 400 = 2,900円、北が600円で、総計が6,000円です。通常のGROUP BY regionの3行に、総計の1行が足されます。',
+    },
+    {
+      slug: 'rollup-two-columns', title: 'ROLLUPの複数列',
+      description: '地域（region）とカテゴリ（category）の組ごとの合計、地域ごとの小計、全体の総計を1回で取得してください。取得する列は、region、category、合計金額の順です。行順は問いません。',
+      sql: 'SELECT region, category, SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region, category);',
+      columns: ['region', 'category', 'sum'],
+      rows: [['東', '食品', 2000], ['東', '雑貨', 500], ['東', null, 2500], ['西', '食品', 1500], ['西', '雑貨', 1000], ['西', null, 400], ['西', null, 2900], ['北', '食品', 600], ['北', null, 600], [null, null, 6000]],
+      hint: 'ROLLUPのカッコに、大きい単位（地域）、小さい単位（カテゴリ）の順で列を並べます。',
+      explanation: '明細6行、地域別の小計3行、総計1行の合計10行です。西のcategoryがNULLの行は、元データの未入力の明細400円と、西の小計2,900円の2つがあります。',
+    },
+    {
+      slug: 'cube-all', title: 'CUBE',
+      description: '地域（region）とカテゴリ（category）について、すべての組み合わせの合計をCUBEで取得してください。取得する列は、region、category、合計金額の順です。行順は問いません。',
+      sql: 'SELECT region, category, SUM(amount)\nFROM sales\nGROUP BY CUBE (region, category);',
+      columns: ['region', 'category', 'sum'],
+      rows: [['東', '食品', 2000], ['東', '雑貨', 500], ['東', null, 2500], ['西', '食品', 1500], ['西', '雑貨', 1000], ['西', null, 400], ['西', null, 2900], ['北', '食品', 600], ['北', null, 600], [null, '食品', 4100], [null, '雑貨', 1500], [null, null, 400], [null, null, 6000]],
+      hint: 'ROLLUPをCUBEに替えると、列の全組み合わせが集計されます。',
+      explanation: 'ROLLUPの10行に、カテゴリだけの合計（食品4,100円、雑貨1,500円、未入力400円）の3行が加わり13行です。食品は東2,000 + 西1,500 + 北600で4,100円です。',
+    },
+    {
+      slug: 'grouping-sets-pick', title: 'GROUPING SETS',
+      description: '地域（region）別の合計とカテゴリ（category）別の合計だけを、GROUPING SETSで1回に取得してください。明細や総計の行は不要です。取得する列は、region、category、合計金額の順です。行順は問いません。',
+      sql: 'SELECT region, category, SUM(amount)\nFROM sales\nGROUP BY GROUPING SETS ((region), (category));',
+      columns: ['region', 'category', 'sum'],
+      rows: [['東', null, 2500], ['西', null, 2900], ['北', null, 600], [null, '食品', 4100], [null, '雑貨', 1500], [null, null, 400]],
+      hint: 'GROUPING SETSのカッコの中に、集計単位ごとに(列)を並べます。',
+      explanation: '地域別3行とカテゴリ別3行の6行です。明細も総計も出ません。最後の行は、カテゴリが未入力の売上（400円）をまとめたものです。',
+    },
+    {
+      slug: 'grouping-subtotals-only', title: 'GROUPING()',
+      description: 'ROLLUP (region, category)の結果から、小計の行と総計の行だけを取得してください。元データでcategoryが未入力の明細（西の400円）は含めません。取得する列は、region、合計金額の順です。行順は問いません。',
+      sql: 'SELECT region, SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region, category)\nHAVING GROUPING(category) = 1;',
+      columns: ['region', 'sum'], rows: [['東', 2500], ['西', 2900], ['北', 600], [null, 6000]],
+      hint: 'HAVINGでGROUPING(category)が1の行（categoryがまとめられた行）だけを残します。',
+      explanation: 'GROUPING(category)は小計と総計の行で1、明細の行で0です。HAVING category IS NULLにすると、未入力の明細（西の400円）も残ってしまいます。',
+    },
+    {
+      slug: 'union-all-equivalent', title: 'UNION ALLとの比較',
+      description: 'カテゴリ（category）ごとの合計に、全体の総計を1行足した結果を、UNION ALLで取得してください。取得する列は、category、合計金額の順です。カテゴリ未入力の行（NULL）は、未入力の合計と総計の2行が出ます。行順は問いません。',
+      sql: 'SELECT category, SUM(amount)\nFROM sales\nGROUP BY category\nUNION ALL\nSELECT NULL, SUM(amount)\nFROM sales;',
+      columns: ['category', 'sum'], rows: [['食品', 4100], ['雑貨', 1500], [null, 400], [null, 6000]],
+      hint: '1つ目のSELECTはcategoryでGROUP BYし、2つ目のSELECTは先頭にNULLを置いて全体を合計します。',
+      explanation: 'カテゴリ別は食品4,100円、雑貨1,500円、未入力400円の3行で、総計6,000円が4行目に加わります。UNION ALLなので、NULLの2行も1行にまとめられません。',
+    },
+    {
+      slug: 'chapter-review-labels', title: '章末問題：ROLLUP・GROUPING()・CASE',
+      description: 'ROLLUP (region, category)で集計し、regionとcategoryの2列と合計金額を取得してください。地域の小計行のcategoryは「小計」、総計行はregionもcategoryも「総計」と表示します。元データでcategoryが未入力の明細は、NULLのまま表示します。列名はregion、category、合計金額はそのままの列名にし、行順は問いません。',
+      sql: "SELECT\n  CASE WHEN GROUPING(region) = 1 THEN '総計' ELSE region END AS region,\n  CASE\n    WHEN GROUPING(region) = 1 THEN '総計'\n    WHEN GROUPING(category) = 1 THEN '小計'\n    ELSE category\n  END AS category,\n  SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region, category);",
+      columns: ['region', 'category', 'sum'],
+      rows: [['東', '食品', 2000], ['東', '雑貨', 500], ['東', '小計', 2500], ['西', '食品', 1500], ['西', '雑貨', 1000], ['西', null, 400], ['西', '小計', 2900], ['北', '食品', 600], ['北', '小計', 600], ['総計', '総計', 6000]],
+      starter: "SELECT\n  COALESCE(region, '総計') AS region,\n  COALESCE(category, '小計') AS category,\n  SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region, category);",
+      hint: 'COALESCEではなく、GROUPING()が1かどうかをCASEで判定します。',
+      explanation: 'COALESCEで置き換えると、西の未入力の明細（400円）まで「小計」になり、総計行のcategoryも「小計」になります。GROUPING()で判定すれば、未入力の明細だけがNULLのまま残ります。',
+      review: 'chapter review',
+      requirements: ['ROLLUP (region, category)で明細・小計・総計を1回で出す', 'GROUPING()で小計行と総計行を判定する', '小計行のcategoryに「小計」、総計行のregionとcategoryに「総計」を表示する', '元データのNULLは置き換えずNULLのまま残す'],
+    },
+    {
+      slug: 'cumulative-review-where-having', title: 'まとめ問題：ROLLUP・WHERE・GROUP BY・HAVING・ORDER BY',
+      description: '金額が500円以上の売上だけを対象に、地域（region）とカテゴリ（category）ごとの合計、地域ごとの小計、総計をROLLUPで集計してください。合計が1,000円以上の行だけを残し、region、category、合計金額をこの順に、regionの昇順、同じregionではcategoryの昇順（NULLは最後）で並べます。',
+      sql: 'SELECT region, category, SUM(amount)\nFROM sales\nWHERE amount >= 500\nGROUP BY ROLLUP (region, category)\nHAVING SUM(amount) >= 1000\nORDER BY region, category;',
+      columns: ['region', 'category', 'sum'],
+      rows: [['東', '食品', 2000], ['東', null, 2500], ['西', '食品', 1500], ['西', null, 2200], [null, null, 5300]],
+      ordered: true,
+      hint: '個別の売上の絞り込みはWHERE、集計後の合計の絞り込みはHAVINGに書きます。',
+      explanation: 'WHEREで300円と400円の売上が除かれ、500円以上の6件が残ります。ROLLUPの結果のうち、合計1,000円以上は東食品2,000、東小計2,500、西食品1,500、西小計2,200、総計5,300の5行です。北の600円は1,000円に届きません。',
+      review: 'cumulative review',
+      requirements: ['WHEREで500円以上の売上だけを集計対象にする', 'ROLLUPで明細・小計・総計を出す', 'HAVINGで合計が1,000円以上の行だけを残す', 'regionの昇順、categoryの昇順で並べる'],
+    },
+  ],
+});

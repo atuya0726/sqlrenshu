@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #1c1c1c;
+  --color-muted: #656565;
+  --color-paper: #ffffff;
+  --color-panel: #ffffff;
+  --color-line: #e7e7e5;
+  --color-brand: #1a7a4c;
+  --color-brand-dark: #14603c;
+  --color-accent: #1a7a4c;
+  --color-bad: #b3492f;
+  --font-sans: "Inter", "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); line-height: 1.6; }
+a { color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+code, pre { font-family: var(--font-mono); }
+.container-shell { width: min(880px, calc(100% - 2.5rem)); margin-inline: auto; }
+.workspace-shell { width: min(1320px, calc(100% - 2.5rem)); margin-inline: auto; }
+.focus-ring:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+.btn { display: inline-flex; align-items: center; gap: .375rem; border-radius: .625rem; background: var(--color-brand); color: #fff; padding: .7rem 1.4rem; font-weight: 500; line-height: 1; transition: background-color .15s ease, transform .1s ease; }
+.btn:hover { background: var(--color-brand-dark); }
+.btn:active { transform: scale(.98); }
+.btn-sm { border-radius: .5rem; padding: .5rem 1rem; font-size: .875rem; }
+.link { color: var(--color-brand); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--color-brand) 35%, transparent); transition: text-decoration-color .15s ease; }
+.link:hover { text-decoration-color: var(--color-brand); }
+.chip { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--color-line); padding: .4rem .9rem; font-size: .8125rem; transition: border-color .15s ease, color .15s ease; }
+.chip:hover { border-color: var(--color-brand); color: var(--color-brand); }
+.row-link { display: flex; margin-inline: -.75rem; padding-inline: .75rem; border-radius: .625rem; transition: background-color .15s ease; }
+.row-link:hover { background: color-mix(in srgb, var(--color-brand) 6%, transparent); }
+.prose-sql > h2 { margin-top: 3rem; font-size: 1.35rem; font-weight: 600; }
+.prose-sql > h3 { margin-top: 2rem; font-size: 1.1rem; font-weight: 600; }
+.prose-sql > p { margin-top: 1rem; line-height: 1.9; color: #3a3a3a; }
+.prose-sql > ul { margin: 1rem 0 0 1.25rem; list-style: disc; line-height: 1.9; }
+.prose-sql > nav ul { margin: .75rem 0 0; list-style: none; line-height: 1.6; }

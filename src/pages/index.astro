@@ -1,0 +1,39 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SqlPlayground from '@/components/SqlPlayground.astro';
+import ProgressSummary from '@/components/ProgressSummary.astro';
+import { questions } from '@/questions/catalog';
+import { sqlTopics } from '@/data/sqlTopics';
+const firstQuestion = questions[0];
+const jsonLd = {
+  '@context':'https://schema.org', '@type':'WebSite', name:'SQL練習室', url:new URL('/', Astro.site),
+  description:'登録不要でブラウザ上のPostgreSQLを実行できる日本語SQL学習サイト', inLanguage:'ja',
+};
+---
+<BaseLayout title="SQL練習室｜登録不要・ブラウザで動かすSQL練習問題" description="登録・ログイン不要。ブラウザだけでPostgreSQLを実行し、SELECTからウィンドウ関数まで、解説と練習問題で学べる日本語SQL学習サイト。" jsonLd={jsonLd}>
+  <section class="workspace-shell py-14 sm:py-20">
+    <h1 class="text-3xl leading-tight sm:text-4xl">登録不要でSQLを練習。</h1>
+    <p class="mt-4 max-w-lg leading-8 text-muted">アカウント作成も環境構築もありません。ページを開き、SQLを書き、ブラウザ内のPostgreSQLで実行結果を確認します。SELECTからウィンドウ関数まで、自動採点つきの練習問題が全{questions.length}問。</p>
+    <p class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3"><a href="#first-question" class="btn focus-ring">今すぐ1問解く ↓</a><a href="/practice/" class="link focus-ring text-sm">全{questions.length}問の一覧を見る</a></p>
+    <div class="mt-10 max-w-xl"><ProgressSummary hideWhenEmpty /></div>
+  </section>
+
+  <section id="first-question" class="workspace-shell scroll-mt-14 border-t border-line py-14">
+    <h2 class="text-lg">説明より先に、1問。</h2>
+    <div class="mt-5"><SqlPlayground question={firstQuestion} compact nextHref="/practice/select/select-02/" /></div>
+  </section>
+
+  <section class="container-shell border-t border-line py-14">
+    <h2 class="text-lg">理解して、解いて、次へ進む</h2>
+    <ol class="mt-6 space-y-6">
+      {[['SQLを理解する','1構文1ページ。例をその場で動かし、よくある間違いまで確認。'],['集中して解く','構文別演習から、複数構文を使うAdvancedへ。'],['組み合わせて使う','まとめ問題で、複数の構文をひとつのSQLに組み立てる。']].map(([t,d], i) => <li class="flex gap-4"><span class="font-mono text-sm text-muted">{i+1}</span><div><h3>{t}</h3><p class="mt-1 text-sm leading-7 text-muted">{d}</p></div></li>)}
+    </ol>
+  </section>
+
+  <section class="container-shell border-t border-line py-14">
+    <div class="flex items-baseline justify-between gap-4"><h2 class="text-lg">構文から学ぶ</h2><a class="link focus-ring text-sm" href="/practice/">演習一覧へ</a></div>
+    <ul class="mt-4 divide-y divide-line">
+      {sqlTopics.map((topic) => <li><a href={`/sql/${topic.slug}/`} class="row-link focus-ring group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"><h3 class="shrink-0 group-hover:text-brand">{topic.label} <span class="text-brand">→</span></h3><p class="text-sm text-muted sm:text-right">{topic.lead.slice(0, 60)}…</p></a></li>)}
+    </ul>
+  </section>
+</BaseLayout>

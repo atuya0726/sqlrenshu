@@ -1,0 +1,43 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProgressSummary from '@/components/ProgressSummary.astro';
+import { questions, getQuestionsByCategory } from '@/questions/catalog';
+import { activePracticeCategories } from '@/lib/learningPath';
+
+const categories = activePracticeCategories.map((category) => ({ ...category, questions: getQuestionsByCategory(category.slug) }));
+const jsonLd = {
+  '@context':'https://schema.org','@type':'ItemList',name:'SQL練習問題',numberOfItems:categories.length,
+  itemListElement:categories.map((category, index) => ({'@type':'ListItem',position:index+1,name:`${category.label}のSQL練習問題`,url:new URL(`/practice/${category.slug}/`, Astro.site)})),
+};
+---
+<BaseLayout title={`SQL練習問題${questions.length}問｜登録不要・ブラウザで実行して自動採点`} description={`登録不要でPostgreSQLを実行できるSQL演習。SELECT、ORDER BY、WHERE、GROUP BY、HAVING、CASE、NULL・COALESCE、JOIN、サブクエリ、ウィンドウ関数など全${questions.length}問。`} jsonLd={jsonLd}>
+  <header class="workspace-shell py-14">
+    <h1 class="text-2xl">SQL練習問題</h1>
+    <p class="mt-3 max-w-xl leading-7 text-muted">解説を読むより、まず実行。全{questions.length}問を{categories.length}の構文に分け、やさしい順に並べています。上から進めても、苦手な構文だけ選んでも構いません。</p>
+    <div class="mt-8 max-w-xl"><ProgressSummary /></div>
+  </header>
+  <section class="workspace-shell border-t border-line py-12">
+    <ol class="divide-y divide-line">{categories.map((category, index) => <li data-category-row data-question-ids={category.questions.map((question) => question.id).join(',')}><a class="row-link focus-ring group items-center gap-5 py-4" href={`/practice/${category.slug}/`}><span class="w-5 shrink-0 font-mono text-sm text-muted">{index+1}</span><span class="w-40 shrink-0 group-hover:text-brand">{category.label}</span><span class="hidden flex-1 text-sm text-muted sm:inline">{category.description}</span><span data-category-count class="ml-auto shrink-0 font-mono text-sm text-muted sm:ml-0">{category.questions.length}問</span><span class="shrink-0 text-brand">→</span></a></li>)}</ol>
+  </section>
+</BaseLayout>
+
+<script>
+  import { loadProgress } from '@/lib/progress';
+
+  const renderCategoryProgress = () => {
+    const solvedIds = new Set(loadProgress().solvedIds);
+    document.querySelectorAll<HTMLElement>('[data-category-row]').forEach((row) => {
+      const ids = (row.dataset.questionIds ?? '').split(',').filter(Boolean);
+      const solved = ids.filter((id) => solvedIds.has(id)).length;
+      const count = row.querySelector<HTMLElement>('[data-category-count]');
+      if (!count) return;
+      count.textContent = solved === 0 ? `${ids.length}問` : solved === ids.length ? `✓ ${ids.length}問` : `${solved} / ${ids.length}問`;
+      count.classList.toggle('text-brand', solved > 0);
+      count.classList.toggle('text-muted', solved === 0);
+    });
+  };
+
+  renderCategoryProgress();
+  window.addEventListener('pageshow', renderCategoryProgress);
+  window.addEventListener('storage', renderCategoryProgress);
+</script>

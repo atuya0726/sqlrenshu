@@ -1,0 +1,13 @@
+---
+import type { GuideTable } from '@/data/sqlTopics';
+interface Props { table: GuideTable; caption: string }
+const { table, caption } = Astro.props;
+---
+<div class="not-prose mt-5 overflow-x-auto rounded-xl border border-line">
+  <table class="w-full border-collapse text-sm">
+    <caption class="px-4 py-3 text-left font-medium">{caption}</caption>
+    <thead><tr class="bg-neutral-50">{table.headers.map((header) => <th scope="col" class="border-b border-line px-4 py-2.5 text-left font-medium text-muted">{header}</th>)}</tr></thead>
+    <tbody>{table.rows.map((row) => <tr class="divide-x divide-line">{row.map((cell) => <td class="whitespace-pre-wrap border-b border-line px-4 py-2.5">{cell === '' ? <span class="text-muted">''（空文字）</span> : cell}</td>)}</tr>)}</tbody>
+  </table>
+  {table.rows.length === 0 && <p class="px-4 py-3 text-sm text-muted">結果は0行です。</p>}
+</div>

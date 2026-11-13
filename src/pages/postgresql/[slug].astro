@@ -1,0 +1,86 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CodeBlock from '@/components/CodeBlock.astro';
+import GuideTable from '@/components/GuideTable.astro';
+import { postgresqlFeatures, postgresqlFeatureBySlug } from '@/data/postgresqlFeatures';
+import { sqlTopicBySlug } from '@/data/sqlTopics';
+
+export function getStaticPaths() { return postgresqlFeatures.map((feature) => ({ params:{ slug:feature.slug } })); }
+const feature = postgresqlFeatureBySlug[Astro.params.slug!];
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
+const jsonLd = [
+  { '@context':'https://schema.org','@type':'TechArticle',headline:feature.title,description:feature.description,inLanguage:'ja',mainEntityOfPage:pageUrl,citation:feature.references.map((reference) => reference.url) },
+  { '@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[
+    {'@type':'ListItem',position:1,name:'ホーム',item:new URL('/', Astro.site)},
+    {'@type':'ListItem',position:2,name:'PostgreSQL固有機能',item:new URL('/postgresql/', Astro.site)},
+    {'@type':'ListItem',position:3,name:feature.label,item:pageUrl},
+  ]},
+  { '@context':'https://schema.org','@type':'FAQPage',mainEntity:feature.faqs.map((faq) => ({'@type':'Question',name:faq.question,acceptedAnswer:{'@type':'Answer',text:faq.answer}})) },
+];
+---
+<BaseLayout title={`${feature.title}｜SQL練習室`} description={feature.description} jsonLd={jsonLd}>
+  <article>
+    <header class="container-shell py-14">
+      <a class="link text-sm" href="/postgresql/">← PostgreSQL固有機能</a>
+      <h1 class="mt-4 text-3xl">{feature.title}</h1>
+      <p class="mt-4 max-w-xl text-lg leading-8 text-muted">{feature.lead}</p>
+    </header>
+    <div class="container-shell border-t border-line py-12">
+      <div class="prose-sql">
+        <nav class="not-prose rounded-xl border border-line bg-neutral-50 p-5" aria-label="このページの目次">
+          <p class="font-medium">このページでわかること</p>
+          <ul class="mt-3 grid gap-2 text-sm text-muted sm:grid-cols-2">
+            <li><a class="link" href="#sample-tables">例で使う表</a></li>
+            <li><a class="link" href="#syntax">{feature.label}の基本構文</a></li>
+            {feature.examples.map((example, index) => <li><a class="link" href={`#example-${index + 1}`}>{example.heading}</a></li>)}
+            <li><a class="link" href="#mistakes">よくある間違い</a></li>
+            <li><a class="link" href="#alternatives">他のSQLでの書き方</a></li>
+          </ul>
+        </nav>
+        <p class="mt-6 text-sm text-muted">{feature.label}はPostgreSQLの機能です。ブラウザ内のPostgreSQL（PGlite）で動作を確認した内容だけを載せています。</p>
+        <h2 id="sample-tables">例で使う表</h2>
+        <p>{feature.sampleIntro}</p>
+        {feature.sampleTables.map((table) => <GuideTable table={table} caption={table.caption} />)}
+        <div class="not-prose mt-5"><CodeBlock code={feature.setup} /></div>
+        <p>上のSQLをコピーすると、同じ表を自分の環境でも作れます。</p>
+        <h2 id="syntax">{feature.label}の基本構文</h2>
+        <div class="not-prose mt-4"><CodeBlock code={feature.syntax} /></div>
+        <p>{feature.syntaxNote}</p>
+        {feature.examples.map((example, index) => <>
+          <h2 id={`example-${index + 1}`}>{example.heading}</h2>
+          <p>{example.body}</p>
+          <div class="not-prose mt-5"><CodeBlock code={example.code} /></div>
+          <GuideTable table={example.resultTable} caption="実行結果" />
+          <p>{example.resultNote}</p>
+        </>)}
+        <h2 id="mistakes">{feature.label}でよくある間違い</h2>
+        <div class="not-prose space-y-5">{feature.mistakes.map((mistake) => <div class="rounded-xl border border-line p-5">
+          <p class="font-medium">{mistake.title}</p>
+          <p class="mt-2 text-sm leading-7 text-muted">{mistake.body}</p>
+          <div class="mt-4"><CodeBlock code={mistake.code} /></div>
+          {mistake.error && <p class="mt-3 text-sm text-muted">実行するとエラーになります：<code>{mistake.error}</code></p>}
+        </div>)}</div>
+        <h2 id="alternatives">標準SQLや他のデータベースでの書き方</h2>
+        {feature.alternatives.map((alternative) => <>
+          <h3>{alternative.heading}</h3>
+          <p>{alternative.body}</p>
+          {alternative.code && <div class="not-prose mt-5"><CodeBlock code={alternative.code} /></div>}
+          {alternative.resultTable && <GuideTable table={alternative.resultTable} caption="実行結果" />}
+        </>)}
+        <h2>関連するSQLガイドと演習</h2>
+        <div class="not-prose mt-3 flex flex-wrap gap-2">
+          {feature.related.map((slug) => <a class="chip focus-ring" href={`/sql/${slug}/`}>{sqlTopicBySlug[slug]?.label ?? slug}のガイド</a>)}
+          {feature.practice.map((item) => <a class="chip focus-ring" href={`/practice/${item.category}/`}>{item.label}の演習</a>)}
+        </div>
+        <h2>{feature.label}についてよくある質問</h2>
+        <dl class="not-prose mt-4 divide-y divide-line border-y border-line">
+          {feature.faqs.map((faq) => <div class="py-5"><dt class="font-medium">{faq.question}</dt><dd class="mt-2 text-sm leading-7 text-muted">{faq.answer}</dd></div>)}
+        </dl>
+        <h2>参考文献</h2>
+        <p>内容はPostgreSQL公式ドキュメントを参照し、初めて学ぶ人向けに日本語で整理しています。</p>
+        <ul>{feature.references.map((reference) => <li><a class="link" href={reference.url} rel="noreferrer">{reference.label}</a> — {reference.description}</li>)}</ul>
+        <p class="not-prose mt-10 text-sm"><a class="link" href="/postgresql/">PostgreSQL固有機能の一覧へ →</a></p>
+      </div>
+    </div>
+  </article>
+</BaseLayout>

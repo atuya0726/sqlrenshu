@@ -1,0 +1,9 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+managePackageManagerVersions: false
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd

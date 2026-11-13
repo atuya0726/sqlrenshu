@@ -1,0 +1,70 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { questions, getQuestionsByCategory } from '@/questions/catalog';
+import { categoryLabels, guideHrefForCategory } from '@/lib/categories';
+import { activePracticeCategories } from '@/lib/learningPath';
+export function getStaticPaths() { return [...new Set(questions.map((question) => question.category))].map((category) => ({ params:{ category } })); }
+const category = Astro.params.category!;
+const list = getQuestionsByCategory(category);
+const label = categoryLabels[category] ?? category;
+const guideHref = guideHrefForCategory(category);
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
+const categoryIndex = activePracticeCategories.findIndex((item) => item.slug === category);
+const nextCategory = categoryIndex >= 0 ? activePracticeCategories[categoryIndex + 1] : undefined;
+const jsonLd = [
+  { '@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[
+    {'@type':'ListItem',position:1,name:'ホーム',item:new URL('/', Astro.site)},
+    {'@type':'ListItem',position:2,name:'SQL演習',item:new URL('/practice/', Astro.site)},
+    {'@type':'ListItem',position:3,name:label,item:pageUrl},
+  ]},
+  { '@context':'https://schema.org','@type':'ItemList',name:`${label}のSQL練習問題`,numberOfItems:list.length,itemListElement:list.map((q,index) => ({'@type':'ListItem',position:index+1,name:q.title,url:new URL(`/practice/${q.category}/${q.id}/`, Astro.site)})) },
+];
+---
+<BaseLayout title={`${label}のSQL練習問題（全${list.length}問・解答つき）｜SQL練習室`} description={`${label}のSQL練習問題${list.length}問。ブラウザ内のPostgreSQLでそのまま実行・自動採点でき、ヒントと解答例つき。登録・ログイン・環境構築は不要です。`} jsonLd={jsonLd}>
+  <header class="workspace-shell py-12">
+    <a class="link focus-ring text-sm" href="/practice/">← 演習一覧</a>
+    <h1 class="mt-4 text-2xl">{label}のSQL練習問題</h1>
+    <p class="mt-3 max-w-xl text-sm leading-7 text-muted">全{list.length}問。SQLを書いて実行すると、ブラウザ内のPostgreSQLがその場で採点します。登録や環境構築は不要で、各問題にヒントと解答例があります。{guideHref && <a class="link focus-ring" href={guideHref}>{label}の解説を読む →</a>}</p>
+    <p data-category-progress class="mt-3 font-mono text-sm text-muted" data-total={list.length} hidden></p>
+  </header>
+  <section class="workspace-shell border-t border-line py-12">
+    <ol class="divide-y divide-line">{list.map((q,index) => <li data-question-row data-question-id={q.id}><a data-question-link class="row-link focus-ring group items-center gap-5 py-4" href={`/practice/${q.category}/${q.id}/`}><span class="w-5 shrink-0 font-mono text-sm text-muted">{index+1}</span><div class="min-w-0 flex-1"><h2 data-question-title class="group-hover:text-brand">{q.title}</h2><p class="mt-1 text-sm leading-6 text-muted">{q.description}</p></div><span class="hidden shrink-0 font-mono text-xs text-muted sm:inline" title="難易度（1〜5）">Lv.{q.level}</span><span data-question-status class="shrink-0 text-brand">解く →</span></a></li>)}</ol>
+    {nextCategory && <p class="mt-8 text-right"><a class="link focus-ring text-sm" href={`/practice/${nextCategory.slug}/`}>次のカテゴリ：{nextCategory.label} →</a></p>}
+  </section>
+</BaseLayout>
+
+<script>
+  import { loadProgress } from '@/lib/progress';
+
+  const renderSolvedQuestions = () => {
+    const solvedIds = new Set(loadProgress().solvedIds);
+    document.querySelectorAll<HTMLElement>('[data-question-row]').forEach((row) => {
+      const solved = solvedIds.has(row.dataset.questionId ?? '');
+      row.dataset.solved = String(solved);
+      const status = row.querySelector<HTMLElement>('[data-question-status]');
+      if (status) status.textContent = solved ? '✓ 正解済み' : '解く →';
+    });
+    const summary = document.querySelector<HTMLElement>('[data-category-progress]');
+    if (summary) {
+      const solvedCount = document.querySelectorAll('[data-question-row][data-solved="true"]').length;
+      summary.hidden = solvedCount === 0;
+      summary.textContent = `${solvedCount} / ${summary.dataset.total}問 正解済み`;
+    }
+  };
+
+  renderSolvedQuestions();
+  window.addEventListener('pageshow', renderSolvedQuestions);
+  window.addEventListener('storage', renderSolvedQuestions);
+</script>
+
+<style>
+  [data-question-row][data-solved='true'] [data-question-link] {
+    background: #f5f5f4;
+    color: var(--color-muted);
+  }
+
+  [data-question-row][data-solved='true'] [data-question-title],
+  [data-question-row][data-solved='true'] [data-question-status] {
+    color: var(--color-muted);
+  }
+</style>

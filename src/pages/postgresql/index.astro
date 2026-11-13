@@ -1,0 +1,11 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { postgresqlFeatures } from '@/data/postgresqlFeatures';
+---
+<BaseLayout title="PostgreSQL固有機能の使い方｜DISTINCT ON・FILTER・RETURNING・ON CONFLICT・LATERAL｜SQL練習室" description="PostgreSQL独自のDISTINCT ON、FILTER、RETURNING、ON CONFLICT（UPSERT）、LATERALの使い方を、サンプル表と実行結果つきで解説。標準SQLやMySQLでの代替の書き方も紹介します。">
+  <section class="container-shell py-14">
+    <h1 class="text-3xl">PostgreSQL固有機能の使い方</h1>
+    <p class="mt-4 max-w-xl leading-8 text-muted">PostgreSQLだけにある便利な構文を、小さな表と実行結果で1つずつ解説します。標準SQLや他のデータベースで同じことをする書き方も載せています。基本のSQLは<a class="link" href="/sql/">SQLガイド</a>で学べます。</p>
+    <ul class="mt-8 max-w-xl divide-y divide-line">{postgresqlFeatures.map((feature) => <li><a class="row-link focus-ring group items-center justify-between py-4" href={`/postgresql/${feature.slug}/`}><span><span class="block font-medium group-hover:text-brand">{feature.label}</span><span class="mt-1 block text-sm text-muted">{feature.summary}</span></span><span class="text-brand">→</span></a></li>)}</ul>
+  </section>
+</BaseLayout>

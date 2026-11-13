@@ -1,0 +1,110 @@
+import { buildExerciseEntries } from '../exerciseEntries';
+
+const setup = `CREATE TABLE sales (id integer PRIMARY KEY, sold_on date NOT NULL, amount integer NOT NULL);
+INSERT INTO sales VALUES (1,'2026-01-01',1000),(2,'2026-01-01',500),(3,'2026-01-03',2000),(4,'2026-01-05',800),(5,'2026-02-02',1200);`;
+
+const cumulativeSetup = `CREATE TABLE customers (id integer PRIMARY KEY, name text NOT NULL);
+CREATE TABLE orders (id integer PRIMARY KEY, customer_id integer REFERENCES customers(id), ordered_on date NOT NULL, amount integer NOT NULL, status text NOT NULL);
+INSERT INTO customers VALUES (1,'青木商店'),(2,'北野物産');
+INSERT INTO orders VALUES (1,1,'2026-01-01',10000,'paid'),(2,1,'2026-01-01',5000,'cancelled'),(3,1,'2026-01-03',20000,'paid'),(4,2,'2026-01-03',7000,'paid'),(5,1,'2026-01-04',3000,'cancelled'),(6,1,'2026-01-05',8000,'paid'),(7,1,'2026-01-05',2000,'paid'),(8,1,'2026-02-01',9000,'paid');`;
+
+export const entries = buildExerciseEntries({
+  category: 'generate-series',
+  tags: ['generate_series', 'PostgreSQL'],
+  setup,
+  exercises: [
+    {
+      slug: 'series-basic',
+      title: 'generate_series',
+      description: '1から5までの連番を、generate_seriesで5行として取得してください。別名は付けません。',
+      sql: 'SELECT *\nFROM generate_series(1, 5);',
+      columns: ['generate_series'],
+      rows: [[1], [2], [3], [4], [5]],
+      hint: 'FROM句に関数を書くと、行を返す表のように使えます。',
+      explanation: '開始と終了を指定すると、終了の5も含めて1ずつ増えた5行になります。表を使わずに行を作れます。',
+    },
+    {
+      slug: 'series-step-descending',
+      title: 'generate_seriesの刻み',
+      description: '10から0まで、5ずつ減る数列を取得してください。10、5、0の順に表示します。別名は付けません。',
+      sql: 'SELECT *\nFROM generate_series(10, 0, -5);',
+      columns: ['generate_series'],
+      rows: [[10], [5], [0]],
+      hint: '第3引数に負の値を指定します。',
+      explanation: '刻みが-5なので10、5、0の3行です。刻みを省くと+1のため、開始が終了より大きい10から0は0行になります。',
+      ordered: true,
+    },
+    {
+      slug: 'series-dates',
+      title: '日付の並び',
+      description: '2026年1月1日から1月7日まで、1日ごとの日付を取得してください。型はdateにし、列名は day とします。日付の昇順で表示します。',
+      sql: "SELECT d::date AS day\nFROM generate_series(TIMESTAMP '2026-01-01', TIMESTAMP '2026-01-07', INTERVAL '1 day') AS d\nORDER BY day;",
+      columns: ['day'],
+      rows: [['2026-01-01'], ['2026-01-02'], ['2026-01-03'], ['2026-01-04'], ['2026-01-05'], ['2026-01-06'], ['2026-01-07']],
+      hint: '刻みはINTERVAL \'1 day\'です。結果は::dateで日付にします。',
+      explanation: '日時の並びを::dateで日付に直すので、7行の日付になります。',
+      ordered: true,
+    },
+    {
+      slug: 'series-months',
+      title: 'INTERVAL 1 month',
+      description: '2026年1月から4月まで、各月の1日の日付を取得してください。型はdateにし、列名は month_start とします。日付の昇順で表示します。',
+      sql: "SELECT d::date AS month_start\nFROM generate_series(TIMESTAMP '2026-01-01', TIMESTAMP '2026-04-01', INTERVAL '1 month') AS d\nORDER BY month_start;",
+      columns: ['month_start'],
+      rows: [['2026-01-01'], ['2026-02-01'], ['2026-03-01'], ['2026-04-01']],
+      hint: '刻みはINTERVAL \'1 month\'にします。',
+      explanation: '月初のまま1か月ずつ進み、4行になります。日数の違う月でも1日のままです。',
+      ordered: true,
+    },
+    {
+      slug: 'daily-zero-fill',
+      title: 'LEFT JOINとCOALESCE',
+      description: '2026年1月1日から1月5日まで、日ごとの売上金額の合計を取得してください。売上のない日は0にします。列名は day と total とし、日付の昇順で表示します。',
+      sql: "SELECT d::date AS day, COALESCE(SUM(s.amount), 0) AS total\nFROM generate_series(TIMESTAMP '2026-01-01', TIMESTAMP '2026-01-05', INTERVAL '1 day') AS d\nLEFT JOIN sales AS s ON s.sold_on = d::date\nGROUP BY d\nORDER BY d;",
+      columns: ['day', 'total'],
+      rows: [['2026-01-01', 1500], ['2026-01-02', 0], ['2026-01-03', 2000], ['2026-01-04', 0], ['2026-01-05', 800]],
+      hint: '日付の並びを左側にしてLEFT JOINし、SUMの結果をCOALESCEで包みます。',
+      explanation: '1日は1000と500の合計1500です。2日と4日は売上がなくSUMがNULLになるので、COALESCEで0になります。売上表だけを集計すると、この2日は行ごと消えます。',
+      ordered: true,
+    },
+    {
+      slug: 'monthly-zero-fill',
+      title: '0件の月を含む件数',
+      description: '2026年1月から3月まで、月ごとの売上件数を取得してください。売上のない月は0件にします。列名は month と cnt とし、月の昇順で表示します。',
+      sql: "SELECT m::date AS month, COUNT(s.id) AS cnt\nFROM generate_series(TIMESTAMP '2026-01-01', TIMESTAMP '2026-03-01', INTERVAL '1 month') AS m\nLEFT JOIN sales AS s\n  ON s.sold_on >= m::date AND s.sold_on < (m + INTERVAL '1 month')::date\nGROUP BY m\nORDER BY m;",
+      columns: ['month', 'cnt'],
+      rows: [['2026-01-01', 4], ['2026-02-01', 1], ['2026-03-01', 0]],
+      hint: '件数は、売上表の列をCOUNTに渡すとNULLを数えません。',
+      explanation: '1月は4件、2月は1件、3月は売上がありません。COUNT(*)だと3月もLEFT JOINで作られた1行を数えて1になります。COUNT(s.id)ならNULLを数えず0です。',
+      ordered: true,
+    },
+    {
+      slug: 'chapter-review-days-without-sales',
+      title: '章末問題：generate_series・LEFT JOIN・NULLの判定',
+      description: '2026年1月1日から1月7日までのうち、売上が1件もない日付を取得してください。型はdateにし、列名は day とします。日付の昇順で表示します。初期SQLを直します。',
+      sql: "SELECT d::date AS day\nFROM generate_series(TIMESTAMP '2026-01-01', TIMESTAMP '2026-01-07', INTERVAL '1 day') AS d\nLEFT JOIN sales AS s ON s.sold_on = d::date\nWHERE s.id IS NULL\nORDER BY day;",
+      columns: ['day'],
+      rows: [['2026-01-02'], ['2026-01-04'], ['2026-01-06'], ['2026-01-07']],
+      hint: 'LEFT JOINで対応する売上がない日は、売上側の列がNULLになります。',
+      explanation: '1日、3日、5日には売上があります。残る2日、4日、6日、7日が売上のない日です。INNER JOINでは売上のある日しか残らず、答えが逆になります。',
+      starter: "SELECT d::date AS day\nFROM generate_series(TIMESTAMP '2026-01-01', TIMESTAMP '2026-01-07', INTERVAL '1 day') AS d\nINNER JOIN sales AS s ON s.sold_on = d::date\nORDER BY day;",
+      ordered: true,
+      review: 'chapter review',
+      requirements: ['1月1日から7日までの日付を作る', '売上表をLEFT JOINして対応を調べる', '売上のない日だけを残す', '日付の昇順で表示する'],
+    },
+    {
+      slug: 'cumulative-review-paid-daily-with-cte',
+      title: 'まとめ問題：generate_series・WITH・JOIN・WHERE・GROUP BY・COALESCE',
+      description: '2026年1月1日から1月5日まで、顧客「青木商店」の支払済み（statusがpaid）注文の金額を日ごとに合計してください。注文のない日と取消注文だけの日は0にします。列名は day と total とし、日付の昇順で表示します。',
+      sql: "WITH paid AS (\n  SELECT orders.ordered_on, orders.amount\n  FROM orders\n  INNER JOIN customers ON customers.id = orders.customer_id\n  WHERE customers.name = '青木商店'\n    AND orders.status = 'paid'\n)\nSELECT d::date AS day, COALESCE(SUM(paid.amount), 0) AS total\nFROM generate_series(TIMESTAMP '2026-01-01', TIMESTAMP '2026-01-05', INTERVAL '1 day') AS d\nLEFT JOIN paid ON paid.ordered_on = d::date\nGROUP BY d\nORDER BY d;",
+      columns: ['day', 'total'],
+      rows: [['2026-01-01', 10000], ['2026-01-02', 0], ['2026-01-03', 20000], ['2026-01-04', 0], ['2026-01-05', 10000]],
+      hint: '顧客と支払状態の絞り込みを先に済ませた表を作り、日付の並びへLEFT JOINします。',
+      explanation: '1日は支払済み10000（取消5000は除く）、3日は青木商店の20000です。北野物産の7000は別の顧客なので入りません。4日は取消のみで0、5日は8000と2000の合計10000、2月1日は期間外です。絞り込みをLEFT JOINの後のWHEREに書くと、0の日が消えてしまいます。',
+      setup: cumulativeSetup,
+      ordered: true,
+      review: 'cumulative review',
+      requirements: ['1月1日から5日までの日付を作る', '青木商店の支払済み注文だけを日付に結び付ける', '注文のない日と取消のみの日は0にする', '日付の昇順で表示する'],
+    },
+  ],
+});
