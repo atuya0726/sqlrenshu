@@ -21,7 +21,7 @@
     "@codemirror/view": "^6.38.1",
     "@electric-sql/pglite": "^0.3.14",
     "@tailwindcss/vite": "^4.1.14",
-    "astro": "^5.13.5",
+    "astro": "^7.3.3",
     "gridjs": "^6.2.0",
     "tailwindcss": "^4.1.14"
   },
