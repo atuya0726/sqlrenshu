@@ -76,7 +76,7 @@ export const entries = buildExerciseEntries({
     {
       slug: 'chapter-review-arrival-rules',
       title: '章末問題：MERGE・UPDATE・INSERT・DELETEの条件分岐',
-      description: 'arrivalsを次のルールで反映してください。(1) 入荷数が0の商品は、一致していればproductsから削除する。(2) 現在の在庫が0の商品は、在庫を入荷数にする。(3) それ以外の一致した商品は、在庫に入荷数を足す。(4) productsにない商品は、入荷数が1以上のものだけ追加する。',
+      description: 'arrivalsを次のルールで反映してください。(1) 入荷数が0の商品は、一致していればproductsから削除する。(2) 現在の在庫が0の商品は、在庫を入荷数にする。(3) それ以外の一致した商品は、在庫に入荷数を足す。(4) productsにない商品は、入荷数が1以上のものだけ追加する。(1)〜(3)の複数に当てはまる商品は、番号の小さい規則を適用する。',
       sql: "MERGE INTO products\nUSING arrivals ON products.id = arrivals.id\nWHEN MATCHED AND arrivals.qty = 0 THEN\n  DELETE\nWHEN MATCHED AND products.stock = 0 THEN\n  UPDATE SET stock = arrivals.qty\nWHEN MATCHED THEN\n  UPDATE SET stock = products.stock + arrivals.qty\nWHEN NOT MATCHED AND arrivals.qty >= 1 THEN\n  INSERT (id, name, stock) VALUES (arrivals.id, arrivals.name, arrivals.qty);",
       setup: setup + "\nINSERT INTO products VALUES (6,'テープ',0);\nINSERT INTO arrivals VALUES (6,'テープ',0),(7,'クリップ',0),(8,'のり',15);",
       columns,

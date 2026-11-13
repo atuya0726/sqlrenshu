@@ -343,7 +343,7 @@ export const topic: SqlTopic = {
   ],
   "mistakes": [
     {
-      "title": "結合条件を書き忘れると、商品のほとんどが同じ価格になる",
+      "title": "結合条件を書き忘れると、全商品が同じ価格になることがある",
       "body": "WHEREで結合条件を書かないと、すべての商品とすべての新価格の組み合わせができ、更新先の1行に複数行が結合されます。この場合どの行の値が使われるかは決まっておらず、実際には全商品が同じ価格になることが多くなります。エラーも出ないので、更新後の表を見るまで気づけません。FROMを書いたら、更新先との結合条件が必ずあるか確認します。",
       "code": "UPDATE products\nSET price = u.new_price\nFROM price_updates AS u;\n\nSELECT * FROM products ORDER BY id;"
     },

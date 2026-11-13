@@ -46,7 +46,7 @@ export const entries = buildExerciseEntries({
     {
       slug: 'median-by-dept',
       title: 'GROUP BYと中央値',
-      description: '部署ごとに給与の中央値を取得してください。部署名と中央値の2列で、行順は問いません。',
+      description: '部署ごとに給与の中央値を取得してください。部署名と中央値の2列で、行順は問いません。別名は付けません。',
       sql: 'SELECT dept, percentile_cont(0.5) WITHIN GROUP (ORDER BY salary)\nFROM staff\nGROUP BY dept;',
       columns: ['dept', 'percentile_cont'],
       rows: [['営業', 300000], ['開発', 435000]],
@@ -89,7 +89,7 @@ export const entries = buildExerciseEntries({
     {
       slug: 'cumulative-review-median-by-dept-name',
       title: 'まとめ問題：PERCENTILE_CONT・JOIN・WHERE・GROUP BY・HAVING・ORDER BY',
-      description: '2020年4月1日以降に入社した社員だけを対象に、部署ごとの給与の中央値を取得してください。社員が3人以上の部署だけを残し、部署名と中央値の2列を中央値の高い順に並べます。給与が未入力の社員も人数には数えます。',
+      description: '2020年4月1日以降に入社した社員だけを対象に、部署ごとの給与の中央値を取得してください。社員が3人以上の部署だけを残し、部署名と中央値の2列を中央値の高い順に並べます。給与が未入力の社員も人数には数えます。別名は付けません。',
       sql: "SELECT departments.name, percentile_cont(0.5) WITHIN GROUP (ORDER BY employees.salary)\nFROM employees\nINNER JOIN departments ON departments.id = employees.dept_id\nWHERE employees.hired_on >= DATE '2020-04-01'\nGROUP BY departments.id, departments.name\nHAVING COUNT(*) >= 3\nORDER BY 2 DESC;",
       columns: ['name', 'percentile_cont'],
       rows: [['開発', 475000], ['営業', 320000]],

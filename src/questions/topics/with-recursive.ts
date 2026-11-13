@@ -81,7 +81,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'cumulative-review-dept-count', title: 'まとめ問題：再帰CTE・JOIN・WHERE・GROUP BY・ORDER BY',
-      description: '田中（id = 2）の配下の社員（田中自身は除く）を、部署（departments）の名前ごとに数え、部署名（name）と人数をこの順に取得してください。人数の多い順に並べます。',
+      description: '田中（id = 2）の配下の社員（田中自身は除く）を、部署（departments）の名前ごとに数え、部署名（name）と人数をこの順に取得してください。人数の多い順に並べます。別名は付けません。',
       sql: 'WITH RECURSIVE subordinates AS (\n  SELECT id, dept_id, 1 AS level\n  FROM employees\n  WHERE id = 2\n  UNION ALL\n  SELECT employees.id, employees.dept_id, subordinates.level + 1\n  FROM employees\n  JOIN subordinates ON employees.manager_id = subordinates.id\n)\nSELECT departments.name, COUNT(*)\nFROM subordinates\nJOIN departments ON departments.id = subordinates.dept_id\nWHERE subordinates.level > 1\nGROUP BY departments.name\nORDER BY COUNT(*) DESC;',
       columns: ['name', 'count'], rows: [['開発', 3], ['営業', 1]], ordered: true,
       hint: '再帰CTEで配下を集め、departmentsにJOINしてから、田中自身を外してGROUP BYで数えます。',

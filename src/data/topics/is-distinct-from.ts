@@ -116,7 +116,7 @@ ORDER BY id;`,
     },
     {
       question: 'IS DISTINCT FROMは他のデータベースでも使えますか？',
-      answer: '標準SQLの比較述語で、PostgreSQLのほか多くのデータベースが対応しています。一方で、MySQLではIS NOT DISTINCT FROMに当たる比較を<=>演算子で書くなど、書き方が異なるものもあります。この記事の書き方はPostgreSQLのものです。',
+      answer: '標準SQLにある比較述語ですが、対応状況や書き方はデータベースごとに異なります。たとえばMySQLには、IS NOT DISTINCT FROMと同じ働きをする<=>演算子があります。この記事の書き方はPostgreSQLのものです。',
     },
     {
       question: 'IS DISTINCT FROMとIS NOT DISTINCT FROMはどう使い分けますか？',

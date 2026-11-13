@@ -85,7 +85,7 @@ export const entries = buildExerciseEntries({
     {
       slug: 'cumulative-review-sales-ranking',
       title: 'まとめ問題：JOIN・WHERE・GROUP BY・ORDER BY・LIMIT・OFFSET',
-      description: 'salesは販売記録で、qtyは販売数量です。数量が2以上の記録だけを対象に、商品ごとの数量合計（別名total）を求めます。合計の多い順（同数は商品idの昇順）に並べ、2位から3件を、商品id・商品名・totalの3列で取得してください。',
+      description: 'salesは販売記録で、qtyは販売数量です。数量が2以上の記録だけを対象に、商品ごとの数量合計（別名total）を求めます。合計の多い順（同数は商品idの昇順）に並べ、2位から3件を、商品id・商品名・totalの3列（列名はid、name、total）で取得してください。',
       sql: 'SELECT items.id, items.name, SUM(sales.qty) AS total\nFROM items\nINNER JOIN sales ON sales.item_id = items.id\nWHERE sales.qty >= 2\nGROUP BY items.id, items.name\nORDER BY total DESC, items.id\nLIMIT 3 OFFSET 1;',
       setup: salesSetup,
       columns: ['id', 'name', 'total'],

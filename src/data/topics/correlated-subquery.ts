@@ -139,7 +139,7 @@ export const topic: SqlTopic = {
     {
       label: 'PostgreSQL公式：スカラーサブクエリ',
       url: 'https://www.postgresql.org/docs/current/sql-expressions.html#SQL-SYNTAX-SCALAR-SUBQUERIES',
-      description: '外側の変数を参照するスカラーサブクエリと、部署別の最大値の例',
+      description: '外側の変数を参照するスカラーサブクエリと、州ごとの最大人口を求める例',
     },
     {
       label: 'PostgreSQL公式：EXISTSと外側の変数',

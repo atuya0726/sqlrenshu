@@ -111,7 +111,7 @@ export const topic: SqlTopic = {
     },
     {
       title: '<> ALLはNOT INと同じ',
-      body: 'NOT INは<> ALLと同等です。そのため、サブクエリにNULLがあるとNOT INと同じ理由で、結果がNULLになり行が残りません。NULLと三値論理の詳細は、NOT INとNULLのガイドで確認できます。',
+      body: 'NOT INは<> ALLと同等です。そのため、サブクエリにNULLがあると、NOT INと同じ理由で、等しい値が見つからない行の結果がNULLになり、行が残りません。NULLと三値論理の詳細は、NOT INとNULLのガイドで確認できます。',
       code: "SELECT *\nFROM employees\nWHERE dept <> ALL (\n  SELECT dept\n  FROM employees\n  WHERE salary >= 400000\n)\nORDER BY id;",
     },
   ],
@@ -122,7 +122,7 @@ export const topic: SqlTopic = {
     },
     {
       question: '> ALLと> (SELECT MAX(...))は同じですか？',
-      answer: 'サブクエリが1行以上返し、NULLがなければ同じ結果です。0行のときは、ALLがtrue、MAXがNULLなので結果が変わります。NULLを含むと、ALLはNULLになり、MAXはNULLを無視した最大値と比べます。',
+      answer: 'サブクエリが1行以上返し、NULLがなければ同じ結果です。0行のときは、ALLがtrue、MAXがNULLなので結果が変わります。NULLを含むと、falseになる比較がない限りALLはNULLになり、MAXはNULLを無視した最大値と比べます。',
     },
     {
       question: 'ANYとALLのどちらを使うか迷います。',

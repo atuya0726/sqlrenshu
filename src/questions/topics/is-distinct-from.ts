@@ -75,7 +75,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'cumulative-review-join-group', title: 'まとめ問題：IS NOT DISTINCT FROM・JOIN・WHERE・GROUP BY・ORDER BY',
-      description: '在籍中（activeがtrue）の会員を、地域（areas）の名前（label）ごとに数え、labelと人数をこの順に取得してください。area_codeがNULLの会員は、codeがNULLの地域（未設定）に対応させます。人数の多い順に並べます。',
+      description: '在籍中（activeがtrue）の会員を、地域（areas）の名前（label）ごとに数え、labelと人数をこの順に取得してください。area_codeがNULLの会員は、codeがNULLの地域（未設定）に対応させます。人数の多い順に並べます。別名は付けません。',
       sql: 'SELECT areas.label, COUNT(*)\nFROM members\nJOIN areas ON members.area_code IS NOT DISTINCT FROM areas.code\nWHERE members.active = true\nGROUP BY areas.label\nORDER BY COUNT(*) DESC;',
       columns: ['label', 'count'], rows: [['東日本', 3], ['未設定', 2], ['西日本', 1]], ordered: true,
       hint: 'NULLを対応させるJOINのあと、WHEREで在籍中に絞ってから、地域名ごとに数えます。',

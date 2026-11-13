@@ -55,7 +55,7 @@ export const topic: SqlTopic = {
     },
     {
       heading: 'numericへ変換してからROUNDで丸める',
-      body: '割られる側または割る側のどちらかをnumericに変換すると、割り算が小数の計算になります。correct::numeric / totalとすると青木は0.7、北野は0.888…、中央は0.333…です。そのままでは桁が長いため、ROUND(値, 2)で小数第2位に丸めます。結果は0.7、0.89、0.33、1です。',
+      body: '割られる側または割る側のどちらかをnumericに変換すると、割り算が小数の計算になります。correct::numeric / totalとすると青木は0.7、北野は0.888…、中央は0.333…です。そのままでは桁が長いため、ROUND(値, 2)で小数第2位に丸めます。結果は0.70、0.89、0.33、1.00です（表は末尾の0を省いて表示しています）。',
       code: 'SELECT name, ROUND(correct::numeric / total, 2) AS ratio\nFROM exam\nORDER BY id;',
       resultTable: { headers: ['name', 'ratio'], rows: [['青木', '0.7'], ['北野', '0.89'], ['中央', '0.33'], ['大和', '1']] },
     },

@@ -65,7 +65,7 @@ export const topic: SqlTopic = {
   notes: [
     {
       title: 'ON条件のNULLは一致しない',
-      body: 'ONのa.id = m.idは、どちらかがNULLのとき真になりません。そのためキー列にNULLがある行は、必ず相手のない行として左右に別々に残ります。NULLどうしを同じと見なして結合したい場合は、COALESCEなどで置き換えるか、IS NOT DISTINCT FROMで比べます。',
+      body: 'ONのa.id = m.idは、どちらかがNULLのとき真になりません。そのためキー列にNULLがある行は、必ず相手のない行として左右に別々に残ります。NULLどうしを同じと見なして結合したい場合は、COALESCEなどで同じ値に置き換えて比べます（本当にその値の行と混ざらないことが前提です）。なお、FULL OUTER JOINのONにIS NOT DISTINCT FROMは使えません。PostgreSQLが「FULL JOIN is only supported with merge-joinable or hash-joinable join conditions」というエラーにするためです。',
     },
     {
       title: 'FULL OUTER JOINのOUTERは省略できる',

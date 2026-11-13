@@ -10,7 +10,7 @@ export const entries = buildExerciseEntries({
   exercises: [
     {
       slug: 'rollup-total', title: 'ROLLUP',
-      description: '売上（sales）を地域（region）ごとに合計し、全体の総計の行も加えて、regionと合計金額をこの順に取得してください。総計の行のregionはNULLのままで構いません。行順は問いません。',
+      description: '売上（sales）を地域（region）ごとに合計し、全体の総計の行も加えて、regionと合計金額をこの順に取得してください。総計の行のregionはNULLのままで構いません。行順は問いません。別名は付けません。',
       sql: 'SELECT region, SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region);',
       columns: ['region', 'sum'], rows: [['東', 2500], ['西', 2900], ['北', 600], [null, 6000]],
       hint: 'GROUP BYのあとにROLLUPを書き、地域の列をカッコに入れます。',
@@ -18,7 +18,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'rollup-two-columns', title: 'ROLLUPの複数列',
-      description: '地域（region）とカテゴリ（category）の組ごとの合計、地域ごとの小計、全体の総計を1回で取得してください。取得する列は、region、category、合計金額の順です。行順は問いません。',
+      description: '地域（region）とカテゴリ（category）の組ごとの合計、地域ごとの小計、全体の総計を1回で取得してください。取得する列は、region、category、合計金額の順です。行順は問いません。別名は付けません。',
       sql: 'SELECT region, category, SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region, category);',
       columns: ['region', 'category', 'sum'],
       rows: [['東', '食品', 2000], ['東', '雑貨', 500], ['東', null, 2500], ['西', '食品', 1500], ['西', '雑貨', 1000], ['西', null, 400], ['西', null, 2900], ['北', '食品', 600], ['北', null, 600], [null, null, 6000]],
@@ -27,7 +27,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'cube-all', title: 'CUBE',
-      description: '地域（region）とカテゴリ（category）について、すべての組み合わせの合計をCUBEで取得してください。取得する列は、region、category、合計金額の順です。行順は問いません。',
+      description: '地域（region）とカテゴリ（category）について、すべての組み合わせの合計をCUBEで取得してください。取得する列は、region、category、合計金額の順です。行順は問いません。別名は付けません。',
       sql: 'SELECT region, category, SUM(amount)\nFROM sales\nGROUP BY CUBE (region, category);',
       columns: ['region', 'category', 'sum'],
       rows: [['東', '食品', 2000], ['東', '雑貨', 500], ['東', null, 2500], ['西', '食品', 1500], ['西', '雑貨', 1000], ['西', null, 400], ['西', null, 2900], ['北', '食品', 600], ['北', null, 600], [null, '食品', 4100], [null, '雑貨', 1500], [null, null, 400], [null, null, 6000]],
@@ -36,7 +36,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'grouping-sets-pick', title: 'GROUPING SETS',
-      description: '地域（region）別の合計とカテゴリ（category）別の合計だけを、GROUPING SETSで1回に取得してください。明細や総計の行は不要です。取得する列は、region、category、合計金額の順です。行順は問いません。',
+      description: '地域（region）別の合計とカテゴリ（category）別の合計だけを、GROUPING SETSで1回に取得してください。明細や総計の行は不要です。取得する列は、region、category、合計金額の順です。行順は問いません。別名は付けません。',
       sql: 'SELECT region, category, SUM(amount)\nFROM sales\nGROUP BY GROUPING SETS ((region), (category));',
       columns: ['region', 'category', 'sum'],
       rows: [['東', null, 2500], ['西', null, 2900], ['北', null, 600], [null, '食品', 4100], [null, '雑貨', 1500], [null, null, 400]],
@@ -45,7 +45,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'grouping-subtotals-only', title: 'GROUPING()',
-      description: 'ROLLUP (region, category)の結果から、小計の行と総計の行だけを取得してください。元データでcategoryが未入力の明細（西の400円）は含めません。取得する列は、region、合計金額の順です。行順は問いません。',
+      description: 'ROLLUP (region, category)の結果から、小計の行と総計の行だけを取得してください。元データでcategoryが未入力の明細（西の400円）は含めません。取得する列は、region、合計金額の順です。行順は問いません。別名は付けません。',
       sql: 'SELECT region, SUM(amount)\nFROM sales\nGROUP BY ROLLUP (region, category)\nHAVING GROUPING(category) = 1;',
       columns: ['region', 'sum'], rows: [['東', 2500], ['西', 2900], ['北', 600], [null, 6000]],
       hint: 'HAVINGでGROUPING(category)が1の行（categoryがまとめられた行）だけを残します。',
@@ -53,7 +53,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'union-all-equivalent', title: 'UNION ALLとの比較',
-      description: 'カテゴリ（category）ごとの合計に、全体の総計を1行足した結果を、UNION ALLで取得してください。取得する列は、category、合計金額の順です。カテゴリ未入力の行（NULL）は、未入力の合計と総計の2行が出ます。行順は問いません。',
+      description: 'カテゴリ（category）ごとの合計に、全体の総計を1行足した結果を、UNION ALLで取得してください。取得する列は、category、合計金額の順です。カテゴリ未入力の行（NULL）は、未入力の合計と総計の2行が出ます。行順は問いません。別名は付けません。',
       sql: 'SELECT category, SUM(amount)\nFROM sales\nGROUP BY category\nUNION ALL\nSELECT NULL, SUM(amount)\nFROM sales;',
       columns: ['category', 'sum'], rows: [['食品', 4100], ['雑貨', 1500], [null, 400], [null, 6000]],
       hint: '1つ目のSELECTはcategoryでGROUP BYし、2つ目のSELECTは先頭にNULLを置いて全体を合計します。',
@@ -73,7 +73,7 @@ export const entries = buildExerciseEntries({
     },
     {
       slug: 'cumulative-review-where-having', title: 'まとめ問題：ROLLUP・WHERE・GROUP BY・HAVING・ORDER BY',
-      description: '金額が500円以上の売上だけを対象に、地域（region）とカテゴリ（category）ごとの合計、地域ごとの小計、総計をROLLUPで集計してください。合計が1,000円以上の行だけを残し、region、category、合計金額をこの順に、regionの昇順、同じregionではcategoryの昇順（NULLは最後）で並べます。',
+      description: '金額が500円以上の売上だけを対象に、地域（region）とカテゴリ（category）ごとの合計、地域ごとの小計、総計をROLLUPで集計してください。合計が1,000円以上の行だけを残し、region、category、合計金額をこの順に、regionの昇順、同じregionではcategoryの昇順（NULLは最後）で並べます。別名は付けません。',
       sql: 'SELECT region, category, SUM(amount)\nFROM sales\nWHERE amount >= 500\nGROUP BY ROLLUP (region, category)\nHAVING SUM(amount) >= 1000\nORDER BY region, category;',
       columns: ['region', 'category', 'sum'],
       rows: [['東', '食品', 2000], ['東', null, 2500], ['西', '食品', 1500], ['西', null, 2200], [null, null, 5300]],

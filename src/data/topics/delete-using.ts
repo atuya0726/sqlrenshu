@@ -170,7 +170,7 @@ export const topic: SqlTopic = {
     },
     {
       "heading": "EXISTSで同じ削除を書いて比べる",
-      "body": "WHEREにEXISTSを書く方法でも、最初の節と同じ会員が削除されます。EXISTSは「一致する行があるか」だけを見る標準SQLの書き方で、他のDBでも使えます。結合先の値を使わず、存在だけで決まる削除ならEXISTSで十分です。USINGは結合先の列も条件や更新に使いたいときに向いています。",
+      "body": "WHEREにEXISTSを書く方法でも、最初の節と同じ会員が削除されます。EXISTSは「一致する行があるか」だけを見る標準SQLの書き方で、他のDBでも使えます。結合先の値を使わず、存在だけで決まる削除ならEXISTSで十分です。USINGは結合先の列も条件に使いたいときに向いています。",
       "code": "DELETE FROM members\nWHERE EXISTS (\n  SELECT 1\n  FROM withdrawals AS w\n  WHERE w.member_id = members.id\n);\n\nSELECT * FROM members ORDER BY id;",
       "resultTable": {
         "headers": [
@@ -276,17 +276,17 @@ export const topic: SqlTopic = {
   "notes": [
     {
       "title": "申請が複数あっても、1つの行は1回しか削除されない",
-      "body": "USINGの表に一致する行が複数あっても、削除される会員の行は1行です。下の例では田中の申請が2件ありますが、RETURNINGに出る田中は1行で、どちらの理由が出るかは決まっていません。DELETEの結果の件数は、結合した行数ではなく削除した行数です。",
+      "body": "USINGの表に一致する行が複数あっても、削除される会員の行は1行です。下の例では田中の申請が2件ありますが、RETURNINGに出る田中は1行です。DELETEの結果の件数は、結合した行数ではなく削除した行数です。",
       "code": "DELETE FROM members\nUSING withdrawals AS w\nWHERE members.id = w.member_id\nRETURNING members.id, members.name;"
     },
     {
       "title": "削除する前に、同じ条件のSELECTで対象を確かめる",
-      "body": "DELETEは実行すると行が消えるため、まず同じ条件のSELECTで対象の行を確認する習慣が安全です。USINGをSELECTに書き換えるときは、更新先の表をFROMに、USINGの表を続けて書きます。確認したあとで、SELECTの部分をDELETEとUSINGに置き換えます。",
-      "code": "SELECT members.*\nFROM members, withdrawals AS w\nWHERE members.id = w.member_id\nORDER BY members.id;"
+      "body": "DELETEは実行すると行が消えるため、まず同じ条件のSELECTで対象の行を確認する習慣が安全です。USINGをSELECTに書き換えるときは、更新先の表をFROMに、USINGの表を続けて書きます。申請が複数ある会員は同じ行が何度も出るので、DISTINCTで1行にまとめています。確認したあとで、SELECTの部分をDELETEとUSINGに置き換えます。",
+      "code": "SELECT DISTINCT members.*\nFROM members, withdrawals AS w\nWHERE members.id = w.member_id\nORDER BY members.id;"
     },
     {
       "title": "MySQLやSQL Serverとは書き方が異なる",
-      "body": "DELETE … USINGは標準SQLではなく、PostgreSQLの拡張です。公式ドキュメントも、USING句とRETURNING句はPostgreSQLの拡張だと説明しています。MySQLやSQL Serverでは、DELETEの後に削除対象の別名を書き、FROMの後でJOINする形が使われます。PostgreSQLへ移すときは、結合条件をWHEREに書き換えるか、EXISTSで書き直します。"
+      "body": "DELETE … USINGは標準SQLではなく、PostgreSQLの拡張です。公式ドキュメントも、USING句とRETURNING句はPostgreSQLの拡張だと説明しています。MySQLにはDELETE 削除対象 FROM 表（JOIN可）の形と、DELETE FROM 削除対象 USING 表（JOIN可）の形があり、SQL ServerはDELETE 別名 FROM 表 JOIN … の形です。どれもFROMやUSINGに削除対象の表自身を含める点がPostgreSQLと異なります。PostgreSQLへ移すときは、結合条件をWHEREに書き換えるか、EXISTSで書き直します。"
     }
   ],
   "faqs": [

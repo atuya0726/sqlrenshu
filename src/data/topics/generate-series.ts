@@ -11,7 +11,7 @@ export const topic: SqlTopic = {
   label: 'generate_series',
   title: 'PostgreSQLのgenerate_seriesとは？連番・日付の並びの作り方と実績のない日を0で埋める方法',
   description: 'PostgreSQLのgenerate_seriesで連番、日付、月の並びを作る方法を、売上表と実行結果で解説。interval刻み、LEFT JOINとCOALESCEで実績のない日を0で埋める方法、WITH RECURSIVEや他DBとの違いも学べます。',
-  lead: 'generate_seriesは、開始値から終了値まで一定の刻みで並ぶ行を作り出すPostgreSQL固有の関数です。表にない連番や日付を作れるため、売上のない日が抜けてしまう集計を、0件の日つきで出し直すときに使います。',
+  lead: 'generate_seriesは、開始値から終了値まで一定の刻みで並ぶ行を作り出すPostgreSQLの関数です。表にない連番や日付を作れるため、売上のない日が抜けてしまう集計を、0件の日つきで出し直すときに使います。',
   sampleIntro: 'salesは1行が売上1件です。sold_onは売上日（date）、amountは金額（円）です。1月は1日（2件）、3日、5日に売上があり、2日と4日は売上がありません。2月は2日に1件あります。',
   sampleTables: [
     {
@@ -75,7 +75,7 @@ export const topic: SqlTopic = {
   notes: [
     {
       title: 'WITH RECURSIVEや他DBでの代用',
-      body: "generate_seriesはPostgreSQL固有で、標準SQLにはありません。他のDBでは、標準SQLのWITH RECURSIVEで同じ並びを作れます。PostgreSQLでも書けますが、短く書けるgenerate_seriesが一般的です。OracleではCONNECT BY LEVELを使う方法もあります。",
+      body: "generate_seriesは標準SQLの関数ではありません。他のDBでは、同名の関数が使えるかどうかや対応する型がDBごとに異なります（たとえばSQL Server 2022以降のGENERATE_SERIESは数値だけです）。再帰CTEで同じ並びを作る方法は標準SQLに基づきますが、WITH RECURSIVEというキーワードの要否など書き方はDBごとに違うため、使うDBのドキュメントで確認してください。PostgreSQLでも書けますが、短く書けるgenerate_seriesが一般的です。",
       code: "WITH RECURSIVE days(day) AS (\n  SELECT DATE '2026-01-01'\n  UNION ALL\n  SELECT day + 1 FROM days WHERE day < DATE '2026-01-05'\n)\nSELECT day FROM days;",
     },
     {
@@ -87,7 +87,7 @@ export const topic: SqlTopic = {
   faqs: [
     {
       question: '終了の値は結果に含まれますか？',
-      answer: '刻みの途中で終了の値にちょうど届くときは含まれます。1から5なら5を含み、1から10を3刻みなら10を含みますが、1から9なら7までです。',
+      answer: '刻みの途中で終了の値にちょうど届くときは含まれます。1から5なら5を含み、3刻みで1から10なら10を含みますが、3刻みで1から9なら7までです。',
     },
     {
       question: 'FROM句ではなくSELECT句に書いてもよいですか？',

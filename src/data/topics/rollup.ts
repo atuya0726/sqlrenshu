@@ -117,7 +117,7 @@ GROUP BY region, ROLLUP (category);`,
     },
     {
       question: 'ROLLUP・CUBE・GROUPING SETSは他のデータベースでも使えますか？',
-      answer: 'これらは標準SQLの構文で、PostgreSQLのほか多くのデータベースが対応していますが、MySQLのWITH ROLLUPのように書き方が異なるものもあります。この記事の書き方はPostgreSQLのものです。',
+      answer: 'これらは標準SQLにある構文ですが、対応範囲や書き方はデータベースごとに異なります。たとえばMySQLでは、GROUP BY ... WITH ROLLUPの形で小計と総計を出せます。この記事の書き方はPostgreSQLのものです。',
     },
   ],
   references: [

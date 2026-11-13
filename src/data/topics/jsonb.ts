@@ -15,7 +15,7 @@ export const topic: SqlTopic = {
   label: 'JSONB',
   title: 'PostgreSQLのJSONBとは？->と->>の違い・入れ子の取り出し・@>での検索',
   description: 'PostgreSQLのjsonb型を、元の表・SQL・実行結果で解説。->と->>の違い、#>>での入れ子の取り出し、数値へのキャスト、@>と?での検索、jsonb_array_elements_textで配列を行に展開する方法を学べます。',
-  lead: 'jsonbは、JSON形式のデータをそのまま1つの列に保存できるPostgreSQLのデータ型です。商品ごとにブランド、価格、タグなど項目が違うデータを、列を増やさずに扱えます。->と->>で値を取り出し、@>で条件に合う行を探し、配列は行に展開して集計する、という流れで使い方を確認しましょう。標準SQLにもJSONを扱う構文はありますが、このページの演算子（->、->>、@>、?）はPostgreSQL固有です。',
+  lead: 'jsonbは、JSON形式のデータをそのまま1つの列に保存できるPostgreSQLのデータ型です。商品ごとにブランド、価格、タグなど項目が違うデータを、列を増やさずに扱えます。->と->>で値を取り出し、@>で条件に合う行を探し、配列は行に展開して集計する、という流れで使い方を確認しましょう。標準SQLにもJSONを扱う構文はありますが、このページの演算子（->、->>、@>、?）は標準SQLの構文ではなく、PostgreSQLの書き方です。',
   sampleIntro: 'productsは商品1件が1行で、attrsがjsonb列です。brand（ブランド）、price（価格・円）、tags（タグの配列）が入り、ノートPCとモニターにはspecs（仕様）という入れ子のオブジェクトもあります。jsonbはキーを短い順、同じ長さなら辞書順に並べて保存するため、表示するとtagsが先頭に来ます。ORDER BYのないSQLの行順は保証されません。',
   sampleTables: [
     {
@@ -77,7 +77,7 @@ export const topic: SqlTopic = {
     },
     {
       title: '標準SQLや他のDBとの違い',
-      body: 'JSONを扱う構文は標準SQLにもあり、PostgreSQL 17からはJSON_VALUEやJSON_QUERYも使えます。ただし、->、->>、@>、?といった演算子や、jsonb型そのものはPostgreSQLの拡張です。MySQLの->や->>は似た見た目でも別の仕様なので、他のDBのSQLをそのまま移すことはできません。',
+      body: 'JSONを扱う構文は標準SQLにもあり、PostgreSQL 17からはJSON_VALUEやJSON_QUERYも使えます。ただし、->、->>、@>、?といった演算子は標準SQLにはなく、jsonb型や@>、?はPostgreSQL固有です。MySQLやSQLiteにも->、->>はありますが、MySQLの->は$.nameのようなJSONパスを右辺に取るなど、PostgreSQLとは仕様が異なります。他のDBのSQLをそのまま移すことはできません。',
     },
     {
       title: '頻繁に検索するキーは列に出すことも検討する',

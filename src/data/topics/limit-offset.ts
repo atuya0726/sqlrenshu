@@ -51,7 +51,7 @@ export const topic: SqlTopic = {
     },
     {
       heading: '標準SQLのFETCH FIRST n ROWS ONLYで書く',
-      body: 'LIMITはPostgreSQLなどで使える書き方で、標準SQLでは OFFSET n ROWS と FETCH FIRST n ROWS ONLY を使います。PostgreSQLは両方に対応しています。次のSQLは、価格の高い順（同額はid順）に並べた4番目から3件を取り、8（ハサミ）、5（付箋）、2（ペン）を返します。LIMIT 3 OFFSET 3と同じ意味で、ほかのDBへ移すときは標準の書き方のほうが通りやすくなります。',
+      body: 'LIMITはPostgreSQLなどで使える書き方で、標準SQLでは OFFSET n ROWS と FETCH FIRST n ROWS ONLY を使います。PostgreSQLは両方に対応しています。次のSQLは、価格の高い順（同額はid順）に並べた4番目から3件を取り、8（ハサミ）、5（付箋）、2（ペン）を返します。LIMIT 3 OFFSET 3と同じ意味で、標準SQLの書き方なので、ほかのDBへ移す場合の候補になります（対応状況はDBごとに確認が必要です）。',
       code: 'SELECT *\nFROM items\nORDER BY price DESC, id\nOFFSET 3 ROWS\nFETCH FIRST 3 ROWS ONLY;',
       resultTable: { headers: ['id', 'name', 'price'], rows: [['8', 'ハサミ', '300'], ['5', '付箋', '200'], ['2', 'ペン', '150']] },
     },

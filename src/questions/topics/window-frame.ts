@@ -116,7 +116,7 @@ export const entries = buildExerciseEntries({
     {
       "slug": "moving-sum",
       "title": "n PRECEDINGの移動合計",
-      "description": "idとamountに、直近3行（当月とその前の2行）の移動合計をmoving_totalとして添えて、id順に取得してください。",
+      "description": "idとamountに、直近3行（現在行とその前の2行）の移動合計をmoving_totalとして添えて、id順に取得してください。",
       "sql": "SELECT id, amount,\n  SUM(amount) OVER (\n    ORDER BY sale_day, id\n    ROWS BETWEEN 2 PRECEDING AND CURRENT ROW\n  ) AS moving_total\nFROM daily_sales\nORDER BY id;",
       "columns": [
         "id",

@@ -454,7 +454,7 @@ const exercises: Exercise[] = [
   {
     "slug": "cumulative-below-average",
     "title": "まとめ問題：UPDATE FROM・GROUP BY・HAVING・WHERE",
-    "description": "部署ごとの平均給与を求め、在職中（status が active）で、所属部署の平均給与より給与が低い社員の給与を、その平均給与に引き上げてください。社員が1人しかいない部署は対象外とします。",
+    "description": "部署ごとの平均給与を求め、在職中（status が active）で、所属部署の平均給与より給与が低い社員の給与を、その平均給与に引き上げてください。平均給与と人数は、休職中の社員も含めた部署の全社員で数えます。社員が1人しかいない部署は対象外とします。",
     "sql": "UPDATE employees AS e\nSET salary = a.avg_salary\nFROM (\n  SELECT dept_id, AVG(salary) AS avg_salary\n  FROM employees\n  GROUP BY dept_id\n  HAVING COUNT(*) >= 2\n) AS a\nWHERE e.dept_id = a.dept_id\n  AND e.status = 'active'\n  AND e.salary < a.avg_salary;",
     "hint": "部署ごとの平均をGROUP BYで求めたサブクエリをFROMに置き、人数の条件はHAVINGに書きます。",
     "explanation": "営業は(300000+280000)/2で平均290000円なので、鈴木が280000円から引き上がります。開発は(250000+320000)/2で平均285000円なので、田中が250000円から上がり、高橋は平均より上で休職中です。総務と部署99は1人だけでHAVINGで除かれ、伊藤と渡辺は変わりません。",

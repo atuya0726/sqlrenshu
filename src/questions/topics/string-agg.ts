@@ -26,7 +26,7 @@ export const entries = buildExerciseEntries({
     {
       slug: 'string-agg-group',
       title: 'STRING_AGGとGROUP BY',
-      description: '商品ごとに、タグをid順に「, 」でつないだ文字列を取得してください。商品名とタグの文字列の2列で、行順は問いません。',
+      description: '商品ごとに、タグをid順に「, 」でつないだ文字列を取得してください。商品名とタグの文字列の2列で、行順は問いません。別名は付けません。',
       sql: "SELECT product, string_agg(tag, ', ' ORDER BY id)\nFROM product_tags\nGROUP BY product;",
       columns: ['product', 'string_agg'],
       rows: [['りんご', '果物, 国産, 果物'], ['みかん', '果物'], ['バナナ', '輸入'], ['ぶどう', null]],
@@ -76,7 +76,7 @@ export const entries = buildExerciseEntries({
     {
       slug: 'chapter-review-distinct-tags-having',
       title: '章末問題：STRING_AGG・DISTINCT・HAVING',
-      description: 'タグ（NULLを除く）の種類が2つ以上ある商品について、商品名と、重複を除いてタグ名の昇順に「/」でつないだ文字列を取得してください。初期SQLを直します。行順は問いません。',
+      description: 'タグ（NULLを除く）の種類が2つ以上ある商品について、商品名と、重複を除いてタグ名の昇順に「/」でつないだ文字列を取得してください。初期SQLを直します。行順は問いません。別名は付けません。',
       sql: "SELECT product, string_agg(DISTINCT tag, '/' ORDER BY tag)\nFROM product_tags\nGROUP BY product\nHAVING COUNT(DISTINCT tag) >= 2;",
       columns: ['product', 'string_agg'],
       rows: [['りんご', '国産/果物']],
@@ -89,7 +89,7 @@ export const entries = buildExerciseEntries({
     {
       slug: 'cumulative-review-orders-items',
       title: 'まとめ問題：STRING_AGG・JOIN・WHERE・GROUP BY・HAVING',
-      description: '2026年1月（1月1日以上2月1日未満）の注文について、顧客ごとに購入した商品名を、重複を除いて商品名の昇順に「, 」でつないでください。購入した商品の種類（NULLを除く）が2つ以上の顧客だけを対象にし、顧客名と連結した文字列の2列を、顧客IDの昇順で取得します。',
+      description: '2026年1月（1月1日以上2月1日未満）の注文について、顧客ごとに購入した商品名を、重複を除いて商品名の昇順に「, 」でつないでください。購入した商品の種類（NULLを除く）が2つ以上の顧客だけを対象にし、顧客名と連結した文字列の2列を、顧客IDの昇順で取得します。別名は付けません。',
       sql: "SELECT customers.name, string_agg(DISTINCT orders.item, ', ' ORDER BY orders.item)\nFROM customers\nINNER JOIN orders ON orders.customer_id = customers.id\nWHERE orders.ordered_on >= DATE '2026-01-01'\n  AND orders.ordered_on < DATE '2026-02-01'\nGROUP BY customers.id, customers.name\nHAVING COUNT(DISTINCT orders.item) >= 2\nORDER BY customers.id;",
       columns: ['name', 'string_agg'],
       rows: [['青木商店', 'ノート, ペン'], ['中央商事', 'テープ, ノート']],
