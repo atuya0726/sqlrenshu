@@ -1,6 +1,6 @@
 # 運用ノート
 
-運用の状態を置く場所。手順は `daily-pdca` スキル（`.claude/skills/daily-pdca/SKILL.md`）にある。
+運用の状態を置く場所。手順は `pdca` スキル（`.claude/skills/pdca/SKILL.md`）にある。
 
 ## 目標
 
@@ -13,7 +13,7 @@
 - 計測: Search Console と Cloudflare Web Analytics をスキルで取得できる。Web Analytics は 9月から計測されている。
 - 収益: AdSense は審査待ち。広告枠（AdSlot）とアフィリエイト（affiliateOffers）は枠だけで中身なし。
 - 必須ページ: `/about/`、`/privacy/`、`/contact/`。運営者名は「SQL練習室 運営者」、連絡先はメール。
-- 運用基盤: GitHub（`origin`、公開）。デプロイは一任。毎朝 launchd で無人実行。
+- 運用基盤: GitHub（`origin`、公開）。デプロイは一任。月曜と木曜の朝7時に launchd で無人実行。
 - 本番の版: 9/16 版が 11/13 まで出ていた。11/13 に全ページを新版へ入れ替えた。11/10 までの数字は 9/16 版のもの。
 
 ## 週次の数字
@@ -50,4 +50,4 @@
 - 2026-11-13: 基準値。Search Console（8/13〜11/10）はクリック30、表示403、平均順位8.6。クリック23はトップページ。表示があるのは15ページだけで、個別の問題ページは0。Web Analytics（9/7〜11/13）は 1390 PV、220 訪問。流入元は直接140、Bing 50、Google 30。
 - 2026-11-13: 解析タグを手動に切り替え。必須ページ3本を公開。AdSense の `ads.txt` と meta タグを設置し、ユーザーが申請。
 - 2026-11-13: ガイド4本を点検。title と description は新版で検索語に対応済みのため変更せず。`/sql/inner-join/` に LEFT JOIN との比較セクションを追加（検索語「sql left join vs inner join」、順位11）。
-- 2026-11-13: `AGENTS.md`、`daily-pdca` スキル、launchd の無人実行を設定。次回はバックログ1（インデックス状況）。
+- 2026-11-13: `AGENTS.md`、`pdca` スキル、launchd の無人実行（月・木）を設定。次回はバックログ1（インデックス状況）と2（lastmod）。

@@ -6,7 +6,7 @@
 
 ## 目的
 
-月1万円の収益。そのためにまずPVを増やす。運用はエージェントに一任されており、毎日1回のPDCAで進める。
+月1万円の収益。そのためにまずPVを増やす。運用はエージェントに一任されており、週2回のPDCAで進める。
 
 ## 構成
 
@@ -59,11 +59,11 @@ pnpm deploy   # ビルドして本番へデプロイ
 
 キーは macOS キーチェーンにある。中身を直接読むコマンドは使わず、スキルのスクリプト経由で使う。
 
-## 毎日の運用
+## 定期の運用
 
-手順は `daily-pdca` スキル（`.claude/skills/daily-pdca/SKILL.md`）にある。ユーザーが「今日の分」と言ったとき、または無人のスケジュール実行で起動されたときは、このスキルに従う。
+手順は `pdca` スキル（`.claude/skills/pdca/SKILL.md`）にある。ユーザーが「今日の分」と言ったとき、または無人のスケジュール実行で起動されたときは、このスキルに従う。
 
-- 無人実行は launchd が毎朝 `scripts/daily-pdca.py` を呼ぶ。設定は `~/Library/LaunchAgents/com.sqlrenshu.daily-pdca.plist`、ログは `~/Library/Logs/sqlrenshu-pdca/`。
+- 無人実行は launchd が月曜と木曜の朝7時に `scripts/pdca.py` を呼ぶ。毎日は回さない。評価は週1回で足り、施策の効果が出るまで2〜4週間かかるため。設定は `~/Library/LaunchAgents/com.sqlrenshu.pdca.plist`、ログは `~/Library/Logs/sqlrenshu-pdca/`。
 - 結果は `discord-notify` スキルで Discord に送る。
 
 ## やらないこと

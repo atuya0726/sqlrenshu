@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""SQL練習室の毎日の運用を、Claude Code の非対話モードで1回実行する。
+"""SQL練習室の定期運用を、Claude Code の非対話モードで1回実行する。
 
-launchd から呼ばれる。1日1回だけ実行し、失敗したら Discord に知らせる。
+launchd から呼ばれる。月曜と木曜に1回ずつ実行し、失敗したら Discord に知らせる。
+Mac が止まっていて実行日を逃したときは、前回の成功から5日以上あいた時点で実行する。
 
-  daily-pdca.py              今日まだなら実行する（launchd 用）
-  daily-pdca.py --force      今日すでに実行済みでも実行する
-  daily-pdca.py --dry-run    数字の取得と施策の選定までを行い、何も変更しない
+  pdca.py              実行日でまだなら実行する（launchd 用）
+  pdca.py --force      実行日でなくても、実行済みでも実行する
+  pdca.py --dry-run    数字の取得と施策の選定までを行い、何も変更しない
 """
 import argparse
 import datetime as dt
@@ -20,16 +21,18 @@ ROOT = Path(__file__).resolve().parent.parent
 LOGS = Path.home() / "Library/Logs/sqlrenshu-pdca"
 STATE = LOGS / "state.json"
 NOTIFY = Path.home() / ".claude/bin/discord-notify"
+RUN_WEEKDAYS = {0, 3}   # 月曜と木曜
+CATCHUP_DAYS = 5        # 前回の成功からこの日数あいたら、実行日でなくても実行する
 START_HOUR = 7          # この時刻より前は実行しない
 MAX_ATTEMPTS = 2        # 1日に試す回数の上限
 TIMEOUT = 90 * 60       # 秒
 
 PROMPT = (
-    "スケジュール実行です。daily-pdca スキル（.claude/skills/daily-pdca/SKILL.md）に従い、"
-    "今日の運用を無人で1周実行してください。途中で質問はできません。"
+    "スケジュール実行です。pdca スキル（.claude/skills/pdca/SKILL.md）に従い、"
+    "今回の運用を無人で1周実行してください。途中で質問はできません。"
 )
 DRY_PROMPT = (
-    "試運転です。daily-pdca スキル（.claude/skills/daily-pdca/SKILL.md）の手順1〜3だけを行ってください。"
+    "試運転です。pdca スキル（.claude/skills/pdca/SKILL.md）の手順1〜3だけを行ってください。"
     "数字の取得と施策の選定までで止め、ファイルの変更、git の操作、デプロイ、Discord への送信はしないでください。"
     "取得できた数字、選んだ施策とその理由、途中で拒否された操作があればその内容を報告してください。"
 )
@@ -62,6 +65,10 @@ def main():
     if scheduled:
         if now.hour < START_HOUR:
             return
+        last_ok = state.get("lastOk")
+        overdue = last_ok is not None and (now.date() - dt.date.fromisoformat(last_ok)).days >= CATCHUP_DAYS
+        if now.weekday() not in RUN_WEEKDAYS and not overdue:
+            return
         if state.get("date") == today and (
             state.get("status") == "ok" or state.get("attempts", 0) >= MAX_ATTEMPTS
         ):
@@ -69,7 +76,7 @@ def main():
 
     attempts = state.get("attempts", 0) + 1 if state.get("date") == today else 1
     if not args.dry_run:
-        STATE.write_text(json.dumps({"date": today, "status": "running", "attempts": attempts}))
+        STATE.write_text(json.dumps({**state, "date": today, "status": "running", "attempts": attempts}))
 
     cmd = ["claude", "-p", DRY_PROMPT if args.dry_run else PROMPT,
            "--permission-mode", "auto", "--permission-prompts", "none",
@@ -96,7 +103,8 @@ def main():
         status, detail = "failed", "claude コマンドが見つからない"
 
     if not args.dry_run:
-        STATE.write_text(json.dumps({"date": today, "status": status, "attempts": attempts}))
+        last_ok = today if status == "ok" else state.get("lastOk")
+        STATE.write_text(json.dumps({"date": today, "status": status, "attempts": attempts, "lastOk": last_ok}))
         if status != "ok":
             retry = "1時間以内にもう一度試します。" if attempts < MAX_ATTEMPTS else "今日はもう再試行しません。"
             notify("SQL練習室 運用 失敗", f"無人実行が失敗しました（{detail}、{attempts}回目）。{retry}\nログ: {log}")
