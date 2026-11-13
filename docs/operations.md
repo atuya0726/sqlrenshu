@@ -19,7 +19,7 @@
 ## 現状（2026-11-13）
 
 - 公開: https://sqlrenshu.com/ は200で応答。457 URL（問題401、ガイド49、PostgreSQL 6 ほか）。
-- 計測: Search Console は取得可能。Cloudflare Web Analytics は 2026-11-13 に計測開始。数字を API で読む手段はまだ無い。
+- 計測: Search Console は取得可能。Cloudflare Web Analytics は 9月から自動挿入で計測されていた。2026-11-13 に手動タグへ切り替え。`cloudflare-web-analytics` スキルで取得する（キー `cf-analytics-sqlrenshu`、ホスト `sqlrenshu.com`、アカウントIDは `.env`）。
 - 収益: 広告枠（AdSlot）とアフィリエイト（affiliateOffers）は枠だけで中身なし。
 - 必須ページ: プライバシーポリシー、運営者情報、お問い合わせが無い。
 - 運用基盤: git リモートなし。デプロイは手動の `pnpm deploy`。
@@ -28,7 +28,7 @@
 
 - [x] Search Console にドメインを登録（`sc-domain:sqlrenshu.com`）。sitemap の送信状況は未確認
 - [x] Cloudflare Web Analytics の計測タグを本番に導入（2026-11-13、トークンは `.env`）
-- [ ] Web Analytics の読み取り用 API トークンをキーチェーンに登録（`cf-analytics-sqlrenshu`）
+- [x] Web Analytics の読み取り用 API トークンをキーチェーンに登録（`cf-analytics-sqlrenshu`）
 - [x] GitHub にリモートを設定（`origin`、公開リポジトリ）
 - [ ] 運営者名の表記と、お問い合わせの受け口（メールかフォームか）を決める
 - [x] デプロイは任せる（2026-11-13）
@@ -52,3 +52,4 @@
 - 2026-11-13: 現状の棚卸しと市場調査。計測・必須ページ・収益の中身が無いことを確認。次回は必須ページ3本と sitemap の lastmod。
 - 2026-11-13: Search Console の基準値（8/13〜11/10、データは9月上旬から）: クリック30、表示403、CTR 7.4%、平均順位8.6。クリック23はトップページ。表示があるのは457ページ中15ページで、個別の問題ページは0。表示が多くクリックが無いのは `/sql/case/`（163、順位9.9）、`/sql/inner-join/`（56、7.5）、`/sql/select/`（53、11.5）、`/sql/window-functions/`（45、10.0）。次回、インデックス登録の状況を確認する。
 - 2026-11-13: Web Analytics の計測タグを全ページに入れてデプロイ。本番で出力を確認。
+- 2026-11-13: Web Analytics の基準値（9/7〜11/13、サンプリングによる推定値）: 1390 PV、220 訪問。流入元は直接140、Bing 50、Google 30。直近3日は1日50〜130 PV。自分のアクセスを含む可能性あり。この日のデプロイで、未反映だった2コミット（14見出しのグループ化、ガイド校閲）も本番に出た。
