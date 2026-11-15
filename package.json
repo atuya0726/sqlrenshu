@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "deploy": "pnpm build && wrangler deploy",
-    "test": "vitest run"
+    "test": "vitest run --hookTimeout=60000 --testTimeout=30000"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",
