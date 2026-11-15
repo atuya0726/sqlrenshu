@@ -39,6 +39,7 @@ pnpm deploy   # ビルドして本番へデプロイ
 - SQL と実行結果は、必ずテストか実行で確かめる。確かめていない結果表を載せない。
 - 内容の基準は PostgreSQL 公式ドキュメント。記憶だけで仕様を書かない。
 - 問題数やガイド数が変わったら、テストと `docs/architecture.md` の件数も直す。
+- 公開済みページの内容を変えたら、`src/pages/sitemap.xml.ts` の `updatedPaths` にパスと日付を足す（sitemap の lastmod になる）。
 - 公開済みの URL は変えない。やむを得ず変えるときは `public/_redirects` に 301 を足す。
 
 ## 本番に出すまで
