@@ -18,7 +18,7 @@ pnpm build
 
 ## Cloudflare Workers Static Assets
 
-正式ドメインは`https://sqlrenshu.com`です。canonical・サイトマップ・robots.txtもこのURLを使用します。独自ドメインをCloudflareへ追加するまではworkers.devのURLで公開されます。
+正式ドメインは`https://sqlrenshu.com`です。canonical・サイトマップ・robots.txtもこのURLを使用します。workers.devのURLとプレビューURLは`wrangler.jsonc`で無効にしています。
 
 ```sh
 pnpm deploy
