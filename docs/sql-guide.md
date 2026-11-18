@@ -98,6 +98,7 @@ type SqlTopic = {
   }[];
   related: string[];         // 既存sqlTopicsのslug
   practiceCategory?: string; // 対応演習が存在する場合だけ指定
+  practiceQuestionId?: string; // ガイド内に埋め込む問題のID。省略時はカテゴリの1問目
 };
 ```
 

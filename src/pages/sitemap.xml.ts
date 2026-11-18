@@ -8,7 +8,11 @@ export const prerender = true;
 // 2026-11-13 に全ページを新版へ入れ替えたので、これを既定にする。
 // それ以降に内容を変えたページは、パスと日付をここへ足す。
 const DEFAULT_LASTMOD = '2026-11-13';
-const updatedPaths: Record<string, string> = {};
+const updatedPaths: Record<string, string> = {
+  '/sql/left-join/': '2026-11-19',
+  '/postgresql/returning/': '2026-11-19',
+  '/postgresql/on-conflict/': '2026-11-19',
+};
 
 export function GET({ site }: { site?: URL }) {
   const origin = site ?? new URL('https://sqlrenshu.com');

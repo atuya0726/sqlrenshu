@@ -10,7 +10,8 @@ import { getQuestionsByCategory } from '@/questions/catalog';
 
 export function getStaticPaths() { return sqlTopics.map((topic) => ({ params:{ slug:topic.slug } })); }
 const topic = sqlTopicBySlug[Astro.params.slug!];
-const mainExercise = topic.practiceCategory ? getQuestionsByCategory(topic.practiceCategory)[0] : undefined;
+const practiceQuestions = topic.practiceCategory ? getQuestionsByCategory(topic.practiceCategory) : [];
+const mainExercise = practiceQuestions.find((question) => question.id === topic.practiceQuestionId) ?? practiceQuestions[0];
 const jsonLd = [
   { '@context':'https://schema.org','@type':'TechArticle',headline:topic.title,description:topic.description,inLanguage:'ja',mainEntityOfPage:new URL(Astro.url.pathname, Astro.site),citation:topic.references.map((reference) => reference.url) },
   { '@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[

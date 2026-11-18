@@ -282,7 +282,7 @@ const returning: PgFeature = {
     { label: 'PostgreSQL公式：INSERT', url: 'https://www.postgresql.org/docs/current/sql-insert.html', description: 'INSERT文の構文とRETURNING句' },
   ],
   related: ['select', 'where'],
-  practice: [],
+  practice: [{ category: 'insert', label: 'INSERT' }, { category: 'update', label: 'UPDATE' }, { category: 'delete', label: 'DELETE' }],
 };
 
 const inventorySetup = `CREATE TABLE inventory (
@@ -366,7 +366,7 @@ const onConflict: PgFeature = {
     { label: 'PostgreSQL公式：MERGE', url: 'https://www.postgresql.org/docs/current/sql-merge.html', description: 'MERGE文の構文' },
   ],
   related: ['select', 'where'],
-  practice: [],
+  practice: [{ category: 'insert', label: 'INSERT' }, { category: 'update', label: 'UPDATE' }],
 };
 
 const lateralSetup = `CREATE TABLE customers (

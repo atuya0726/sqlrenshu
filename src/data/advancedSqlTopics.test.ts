@@ -78,6 +78,7 @@ for (const topic of sqlTopics.filter((topic) => topic.slug !== 'select')) {
     it('links to existing guides and exercises', () => {
       for (const slug of topic.related) expect(sqlTopics.some((related) => related.slug === slug)).toBe(true);
       if (topic.practiceCategory) expect(questions.some((question) => question.category === topic.practiceCategory)).toBe(true);
+      if (topic.practiceQuestionId) expect(questions.some((question) => question.id === topic.practiceQuestionId && question.category === topic.practiceCategory)).toBe(true);
     });
 
     if (topic.slug === 'intersect-except') {

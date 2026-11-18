@@ -19,6 +19,7 @@ export type SqlTopic = {
   references: { label: string; url: string; description: string }[];
   related: string[];
   practiceCategory?: string;
+  practiceQuestionId?: string; // ガイド内に埋め込む問題。省略時はカテゴリの1問目
 };
 
 export const sqlTopics: SqlTopic[] = [

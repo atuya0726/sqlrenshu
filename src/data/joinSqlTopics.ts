@@ -490,6 +490,8 @@ export const joinTopics: SqlTopic[] = [
       "inner-join",
       "where",
       "group-by"
-    ]
+    ],
+    "practiceCategory": "join",
+    "practiceQuestionId": "join-03"
   }
 ];
