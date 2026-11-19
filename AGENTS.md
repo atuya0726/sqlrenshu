@@ -22,7 +22,8 @@
 | `src/pages/` | ページ。`/sql/{slug}/`、`/practice/{category}/{id}/`、`/postgresql/{slug}/` |
 | `src/layouts/BaseLayout.astro` | head、フッター、解析タグ |
 | `public/` | `robots.txt`、`ads.txt`、`_headers`、`_redirects` |
-| `docs/operations.md` | 運用の状態、数字、バックログ、ログ |
+| `docs/operations.md` | 運用の状態、数字、施策の検証、バックログ、ログ |
+| `docs/research.md` | 検索語と競合の調査結果、実装待ちの仕様 |
 
 ## コマンド
 
@@ -64,6 +65,7 @@ pnpm deploy   # ビルドして本番へデプロイ
 
 手順は `pdca` スキル（`.claude/skills/pdca/SKILL.md`）にある。ユーザーが「今日の分」と言ったとき、または無人のスケジュール実行で起動されたときは、このスキルに従う。
 
+- 月曜は調査の回（施策の検証、検索語の深掘り、競合調査、仕様づくり）、木曜は実装の回。数字を記録して小さな修正をするだけの回にしない。
 - 無人実行は launchd が月曜と木曜の朝7時に `scripts/pdca.py` を呼ぶ。毎日は回さない。評価は週1回で足り、施策の効果が出るまで2〜4週間かかるため。設定は `~/Library/LaunchAgents/com.sqlrenshu.pdca.plist`、ログは `~/Library/Logs/sqlrenshu-pdca/`。
 - 結果は `discord-notify` スキルで Discord に送る。
 
