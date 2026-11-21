@@ -43,8 +43,6 @@
 - [ ] Search Console の URL 検査で、`/sql/case/`、`/sql/inner-join/`、`/sql/select/`、`/sql/window-functions/` のインデックス登録をリクエストする。余裕があれば「検出 - インデックス未登録」の `/sql/where/`、`/sql/having/`、`/sql/left-join/` も
 - [ ] Search Console の「サイトマップ」で `https://sqlrenshu.com/sitemap.xml` を送信し直す（Google が読んだのは 11/13 の176件の版。今は460件で lastmod 付き）。同じ画面で、エラーになっている `https://www.sqlrenshu.com/sitemap.xml` を削除する
 - [ ] Cloudflare ダッシュボードの「Workers & Pages → sqlrenshu → 設定 → ドメインとルート」で、`workers.dev` とプレビュー URL が「無効」になっているかを見る（11/19 に設定ファイルで無効化してデプロイ済み。エージェントは workers.dev の URL を知らないため、外からの確認ができていない）
-- [ ] Cloudflare ダッシュボードの「sqlrenshu.com → SSL/TLS → エッジ証明書」で「常に HTTPS を使用」をオンにする（11/21 時点で `http://sqlrenshu.com/` が 200 を返し、`https://` へ転送されない。`http://` の URL が検索結果に約9件出ている。canonical は `https://` を指しているので害は小さいが、評価が割れる）
-- [ ] Bing Webmaster Tools（https://www.bing.com/webmasters）にサイトを登録し、`https://sqlrenshu.com/sitemap.xml` を送信する。Search Console からのインポートが使える（直近7日の訪問は Bing 37、Google 10 で、Bing のほうが多いのに検索語が見えていない）
 - [ ] ASP に登録する（A8.net、もしもアフィリエイト、Amazon アソシエイト）
 - [ ] Zenn / Qiita / X への投稿をするか決める（下書きはエージェントが作る）
 
@@ -75,3 +73,4 @@
 - 2026-11-21: 調査の回（ユーザーの指示で月曜の分を前倒し）。直近7日は PV 1015、訪問80。検索（10/22〜11/18）はクリック29、表示563、平均順位7.7で、前の28日（7、187、9.6）の約3倍。表示は 11/15 から1日50〜100。クリック29のうち25はトップで、ガイドは順位6〜10に固まりクリックはほぼ0。評価日の来た施策は無い。
 - 2026-11-21: CASE と UNION の競合調査（各9本を読んだ）。CASE は AND・OR の複数条件、入れ子、LIKE、WHERE、UPDATE が無い。UNION は性能差、結合後の GROUP BY、エラー例、NULL が無い。読んだ18本に実行環境と練習問題は無い。仕様3件を `docs/research.md` に書いた。本文の変更は無し。
 - 2026-11-21: `http://sqlrenshu.com/` が 200 を返し `https://` へ転送されないことを確かめ、「常に HTTPS を使用」と Bing Webmaster Tools の登録をユーザーに依頼。次回（11/23 月）は週次の数字を見て、仕様1（`/sql/case/` の複数条件、LIKE、入れ子）を実装する。月曜だが未実装の仕様が3件あるため。
+- 2026-11-21: ユーザーが「常に HTTPS を使用」をオンにした。`http://sqlrenshu.com/sql/with-recursive/` が 301 で `https://` へ転送されることを確認。Bing Webmaster Tools は登録しない（ユーザーの判断。Google 向けの改善で Bing も伸びると見る）。Bing 向けの依頼は今後出さない。
