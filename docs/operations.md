@@ -74,3 +74,4 @@
 - 2026-11-21: CASE と UNION の競合調査（各9本を読んだ）。CASE は AND・OR の複数条件、入れ子、LIKE、WHERE、UPDATE が無い。UNION は性能差、結合後の GROUP BY、エラー例、NULL が無い。読んだ18本に実行環境と練習問題は無い。仕様3件を `docs/research.md` に書いた。本文の変更は無し。
 - 2026-11-21: `http://sqlrenshu.com/` が 200 を返し `https://` へ転送されないことを確かめ、「常に HTTPS を使用」と Bing Webmaster Tools の登録をユーザーに依頼。次回（11/23 月）は週次の数字を見て、仕様1（`/sql/case/` の複数条件、LIKE、入れ子）を実装する。月曜だが未実装の仕様が3件あるため。
 - 2026-11-21: ユーザーが「常に HTTPS を使用」をオンにした。`http://sqlrenshu.com/sql/with-recursive/` が 301 で `https://` へ転送されることを確認。Bing Webmaster Tools は登録しない（ユーザーの判断。Google 向けの改善で Bing も伸びると見る）。Bing 向けの依頼は今後出さない。
+- 2026-11-21: サイト全体の品ぞろえを競合9サイトと比べた。自分に無いのは DDL（CREATE TABLE と制約は6サイト、ビュー6、インデックス5）と、DISTINCT、COUNT、BETWEEN の専用ページ。PGlite で DDL、EXPLAIN、ビュー、トランザクション、トリガー、GRANT が動くことを確かめた。仕様4（`/sql/create-table/`）と仕様5（`/sql/distinct/`）を足した。実装の順は 仕様1 → 仕様4 → 仕様2。
