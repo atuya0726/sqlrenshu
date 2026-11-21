@@ -98,7 +98,8 @@ export type QuestionCategory =
   | 'update-from'
   | 'delete-using'
   | 'merge'
-  | 'create-table';
+  | 'create-table'
+  | 'distinct';
 
 export type ProgressState = {
   version: 1;

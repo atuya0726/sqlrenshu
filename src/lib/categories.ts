@@ -48,6 +48,7 @@ export const categoryLabels: Record<string, string> = {
   'delete-using': 'DELETE … USING',
   'merge': 'MERGE',
   'create-table': 'CREATE TABLE',
+  'distinct': 'DISTINCT',
 };
 
 // 演習一覧の並び順（教える順）と一行説明。学習パス・「続きから」・次のカテゴリ導線の基準になる。
@@ -79,6 +80,7 @@ const practiceOrder: [slug: string, description: string][] = [
   ['not-in', 'NULLで結果が0件になる罠を避ける'],
   ['any-all', 'サブクエリの複数の値とまとめて比較する'],
   ['correlated-subquery', '外側の行ごとに内側の問い合わせを評価する'],
+  ['distinct', '重複を除き、値の種類を数える'],
   ['limit-offset', '上位N件とページングを正しく書く'],
   ['cast', '文字列・数値・日付の型を変換する'],
   ['nullif', '特定の値をNULLに変え、ゼロ除算を避ける'],
@@ -111,6 +113,7 @@ export const extraTopicSlugs: string[] = [
   'not-in',
   'any-all',
   'correlated-subquery',
+  'distinct',
   'limit-offset',
   'cast',
   'nullif',
@@ -156,7 +159,7 @@ export const practiceGroups: PracticeGroup[] = [
   { id: 'dml', stage: '入門', title: 'データの更新', slugs: ['insert', 'update', 'delete'] },
   { id: 'join-advanced', stage: '応用', title: '結合の応用', slugs: ['self-join', 'cross-join', 'full-outer-join'] },
   { id: 'subquery-advanced', stage: '応用', title: 'サブクエリの応用', slugs: ['not-in', 'any-all', 'correlated-subquery'] },
-  { id: 'values', stage: '応用', title: '件数・型・NULLの扱い', slugs: ['limit-offset', 'cast', 'nullif', 'is-distinct-from'] },
+  { id: 'values', stage: '応用', title: '重複・件数・型・NULLの扱い', slugs: ['distinct', 'limit-offset', 'cast', 'nullif', 'is-distinct-from'] },
   { id: 'aggregate-advanced', stage: '応用', title: '再帰と高度な集計', slugs: ['with-recursive', 'rollup', 'string-agg', 'percentile-cont'] },
   { id: 'window-advanced', stage: '応用', title: 'ウィンドウ関数の応用', slugs: ['lag-lead', 'window-frame', 'ntile'] },
   { id: 'series-regexp', stage: '応用', title: '日付計算・連番・正規表現', slugs: ['date-arithmetic', 'generate-series', 'regexp'] },

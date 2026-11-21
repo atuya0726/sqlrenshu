@@ -270,6 +270,35 @@ for (const topic of sqlTopics.filter((topic) => topic.slug !== 'select')) {
       });
     }
 
+    if (topic.slug === 'union') {
+      it('plans UNION ALL as a plain append and merges NULL rows under UNION', async () => {
+        const plan = await db.query<{ 'QUERY PLAN': string }>('EXPLAIN (COSTS OFF) SELECT * FROM morning_results UNION ALL SELECT * FROM evening_results');
+        expect(plan.rows.map((row) => row['QUERY PLAN'].trim())).toEqual(['Append', '->  Seq Scan on morning_results', '->  Seq Scan on evening_results']);
+        expect((await db.query('SELECT NULL::integer AS score UNION SELECT NULL')).rows).toEqual([{ score: null }]);
+        expect((await db.query('SELECT NULL::integer AS score UNION ALL SELECT NULL')).rows).toHaveLength(2);
+      });
+    }
+
+    if (topic.slug === 'case') {
+      it('agrees between the nested CASE and the flat AND form, and nulls unmatched rows when UPDATE omits ELSE', async () => {
+        const nested = await db.query("SELECT id, CASE WHEN department = '営業' THEN CASE WHEN salary >= 350000 THEN '営業・対象' ELSE '営業・対象外' END ELSE '営業以外' END AS label FROM employees ORDER BY id");
+        const flat = await db.query("SELECT id, CASE WHEN department = '営業' AND salary >= 350000 THEN '営業・対象' WHEN department = '営業' THEN '営業・対象外' ELSE '営業以外' END AS label FROM employees ORDER BY id");
+        expect(nested.rows).toEqual(flat.rows);
+        expect((await db.query("SELECT CASE name WHEN '北%' THEN 1 ELSE 0 END AS matched FROM employees WHERE name = '北野'")).rows).toEqual([{ matched: 0 }]);
+        await db.exec("BEGIN; UPDATE employees SET salary = CASE WHEN department = '営業' THEN salary + 10000 END;");
+        expect((await db.query("SELECT COUNT(*) FROM employees WHERE department = '開発' AND salary IS NULL")).rows).toEqual([{ count: 2 }]);
+        await db.exec('ROLLBACK;');
+      });
+    }
+
+    if (topic.slug === 'distinct') {
+      it('treats the parenthesized form like a plain column list and rejects DISTINCT in the middle of the list', async () => {
+        expect((await db.query('SELECT DISTINCT (customer), item FROM orders')).rows).toHaveLength(5);
+        await expect(db.exec('SELECT customer, DISTINCT item FROM orders')).rejects.toThrow('syntax error');
+        expect((await db.query('SELECT customer FROM orders GROUP BY customer')).rows).toHaveLength(3);
+      });
+    }
+
     if (topic.slug === 'having') {
       it('verifies the FAQ about HAVING without GROUP BY', async () => {
         expect((await db.query('SELECT COUNT(*) FROM employees HAVING COUNT(*) >= 5')).rows).toEqual([{ count: 5 }]);

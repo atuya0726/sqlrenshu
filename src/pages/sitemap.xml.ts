@@ -18,6 +18,12 @@ const updatedPaths: Record<string, string> = {
   '/sql/create-table/': '2026-11-21',
   '/practice/create-table/': '2026-11-21',
   ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`/practice/create-table/create-table-0${index + 1}/`, '2026-11-21'])),
+  // 2026-11-21: CASE と UNION のガイドに節を追加。DISTINCT のガイドと演習8問を追加。
+  '/sql/case/': '2026-11-21',
+  '/sql/union/': '2026-11-21',
+  '/sql/distinct/': '2026-11-21',
+  '/practice/distinct/': '2026-11-21',
+  ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`/practice/distinct/distinct-0${index + 1}/`, '2026-11-21'])),
 };
 
 export function GET({ site }: { site?: URL }) {

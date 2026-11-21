@@ -131,6 +131,96 @@ export const caseTopic: SqlTopic = {
       }
     },
     {
+      "heading": "ANDで複数の条件をすべて満たす行を分ける",
+      "body": "WHENの条件は、ANDでつないで複数書けます。ここでは部署と月給の2つの列を見て、「営業で、月給35万円以上」の人だけを「対象」にします。条件を両方満たすのは中央さんだけです。青木さんは営業ですが30万円、北野さんと大和さんは40万円ですが開発なので、どちらもELSEの「対象外」になります。",
+      "code": "SELECT name, department, salary,\n  CASE\n    WHEN department = '営業' AND salary >= 350000 THEN '対象'\n    ELSE '対象外'\n  END AS label\nFROM employees;",
+      "resultTable": {
+        "headers": [
+          "name",
+          "department",
+          "salary",
+          "label"
+        ],
+        "rows": [
+          [
+            "青木",
+            "営業",
+            "300000",
+            "対象外"
+          ],
+          [
+            "北野",
+            "開発",
+            "400000",
+            "対象外"
+          ],
+          [
+            "中央",
+            "営業",
+            "350000",
+            "対象"
+          ],
+          [
+            "大和",
+            "開発",
+            "400000",
+            "対象外"
+          ],
+          [
+            "恵比寿",
+            "サポート",
+            "NULL",
+            "対象外"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "ORでどちらかの条件を満たす行を分ける",
+      "body": "ORでつなぐと、条件のどちらか一方でも満たせば、そのWHENが採用されます。「開発、または月給35万円以上」とすると、開発の北野さんと大和さんに加えて、営業で35万円の中央さんも「対象」になります。ANDとORを1つの条件に混ぜるときは、ANDが先に評価されます。意図した組み合わせになるように、ORの部分を括弧で囲みます。",
+      "code": "SELECT name, department, salary,\n  CASE\n    WHEN department = '開発' OR salary >= 350000 THEN '対象'\n    ELSE '対象外'\n  END AS label\nFROM employees;",
+      "resultTable": {
+        "headers": [
+          "name",
+          "department",
+          "salary",
+          "label"
+        ],
+        "rows": [
+          [
+            "青木",
+            "営業",
+            "300000",
+            "対象外"
+          ],
+          [
+            "北野",
+            "開発",
+            "400000",
+            "対象"
+          ],
+          [
+            "中央",
+            "営業",
+            "350000",
+            "対象"
+          ],
+          [
+            "大和",
+            "開発",
+            "400000",
+            "対象"
+          ],
+          [
+            "恵比寿",
+            "サポート",
+            "NULL",
+            "対象外"
+          ]
+        ]
+      }
+    },
+    {
       "heading": "ELSEを省略すると未一致はNULLになる",
       "body": "ELSEを書かずに35万円以上だけに「対象」を付けます。どのWHENにも一致しない青木さんと恵比寿さんの結果はNULLです。CASEがNULLを返しても、その社員の行が消えるわけではありません。行を取り除くWHEREとの違いを結果表で確認してください。",
       "code": "SELECT name, salary,\n  CASE\n    WHEN salary >= 350000 THEN '対象'\n  END AS label\nFROM employees;",
@@ -213,8 +303,38 @@ export const caseTopic: SqlTopic = {
       "body": "NULLでないことを条件にするときは、WHEN salary IS NOT NULLと書きます。入力済みの4人は「入力済み」、恵比寿さんはELSEの「未入力」になります。IS NULLとIS NOT NULLのどちらを使っても同じ分類ができるので、読みやすいほうを選びます。salary <> NULLのような比較はtrueにならず、全員がELSEへ回ってしまいます。",
       "code": "SELECT name, salary,\n  CASE\n    WHEN salary IS NOT NULL THEN '入力済み'\n    ELSE '未入力'\n  END AS entry_status\nFROM employees;",
       "resultTable": {
-        "headers": ["name", "salary", "entry_status"],
-        "rows": [["青木", "300000", "入力済み"], ["北野", "400000", "入力済み"], ["中央", "350000", "入力済み"], ["大和", "400000", "入力済み"], ["恵比寿", "NULL", "未入力"]]
+        "headers": [
+          "name",
+          "salary",
+          "entry_status"
+        ],
+        "rows": [
+          [
+            "青木",
+            "300000",
+            "入力済み"
+          ],
+          [
+            "北野",
+            "400000",
+            "入力済み"
+          ],
+          [
+            "中央",
+            "350000",
+            "入力済み"
+          ],
+          [
+            "大和",
+            "400000",
+            "入力済み"
+          ],
+          [
+            "恵比寿",
+            "NULL",
+            "未入力"
+          ]
+        ]
       }
     },
     {
@@ -222,8 +342,32 @@ export const caseTopic: SqlTopic = {
       "body": "CASE式の結果にASで名前を付けないと、PostgreSQLは列名をcaseにします。ここではAS行を省いた例を実行しています。結果の列を後から指定したり、読む人に意味を伝えたりするには、END AS 列名と書きます。ENDの直後にASを置く点がポイントです。",
       "code": "SELECT name,\n  CASE\n    WHEN salary IS NULL THEN '未入力'\n    ELSE '入力済み'\n  END\nFROM employees;",
       "resultTable": {
-        "headers": ["name", "case"],
-        "rows": [["青木", "入力済み"], ["北野", "入力済み"], ["中央", "入力済み"], ["大和", "入力済み"], ["恵比寿", "未入力"]]
+        "headers": [
+          "name",
+          "case"
+        ],
+        "rows": [
+          [
+            "青木",
+            "入力済み"
+          ],
+          [
+            "北野",
+            "入力済み"
+          ],
+          [
+            "中央",
+            "入力済み"
+          ],
+          [
+            "大和",
+            "入力済み"
+          ],
+          [
+            "恵比寿",
+            "未入力"
+          ]
+        ]
       }
     },
     {
@@ -261,6 +405,84 @@ export const caseTopic: SqlTopic = {
             "恵比寿",
             "サポート",
             "O"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "LIKEで文字列の一部が一致する行を分ける",
+      "body": "WHENの条件にはLIKEも書けます。名前が「北」で始まる人を「北で始まる」、それ以外を「その他」と表示します。%は0文字以上の任意の文字列を表すので、'北%'は北野さんに一致します。LIKEを使えるのは、このCASE WHEN 条件の形です。CASE name WHEN '北%'のような単純CASEは等しいかどうかだけを比べるので、パターンとしては働きません。",
+      "code": "SELECT name,\n  CASE\n    WHEN name LIKE '北%' THEN '北で始まる'\n    ELSE 'その他'\n  END AS name_group\nFROM employees;",
+      "resultTable": {
+        "headers": [
+          "name",
+          "name_group"
+        ],
+        "rows": [
+          [
+            "青木",
+            "その他"
+          ],
+          [
+            "北野",
+            "北で始まる"
+          ],
+          [
+            "中央",
+            "その他"
+          ],
+          [
+            "大和",
+            "その他"
+          ],
+          [
+            "恵比寿",
+            "その他"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "CASEを入れ子にして、条件を2段階で分ける",
+      "body": "THENやELSEの値として、別のCASEを書けます。ここでは、まず部署が営業かどうかで分け、営業の人だけを月給でさらに分けます。青木さんは「営業・対象外」、中央さんは「営業・対象」、営業でない3人は「営業以外」です。入れ子が深くなると読みにくくなります。同じ分類は、WHEN department = '営業' AND salary >= 350000のようにANDを使ったWHENを並べても書けます。",
+      "code": "SELECT name, department, salary,\n  CASE\n    WHEN department = '営業' THEN\n      CASE\n        WHEN salary >= 350000 THEN '営業・対象'\n        ELSE '営業・対象外'\n      END\n    ELSE '営業以外'\n  END AS label\nFROM employees;",
+      "resultTable": {
+        "headers": [
+          "name",
+          "department",
+          "salary",
+          "label"
+        ],
+        "rows": [
+          [
+            "青木",
+            "営業",
+            "300000",
+            "営業・対象外"
+          ],
+          [
+            "北野",
+            "開発",
+            "400000",
+            "営業以外"
+          ],
+          [
+            "中央",
+            "営業",
+            "350000",
+            "営業・対象"
+          ],
+          [
+            "大和",
+            "開発",
+            "400000",
+            "営業以外"
+          ],
+          [
+            "恵比寿",
+            "サポート",
+            "NULL",
+            "営業以外"
           ]
         ]
       }
@@ -321,16 +543,117 @@ export const caseTopic: SqlTopic = {
         ],
         "rows": [
           [
+            "サポート",
+            "0"
+          ],
+          [
             "営業",
             "1"
           ],
           [
             "開発",
             "2"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "WHEREの中でCASEを使い、行ごとに条件を変える",
+      "body": "CASEはSELECTの列だけでなく、WHEREの条件にも書けます。ここでは部署によって基準を変え、営業は35万円以上、それ以外の部署は40万円以上の人だけを残します。残るのは中央さん、北野さん、大和さんの3人です。月給がNULLの恵比寿さんは、比較の結果がtrueにならないので残りません。条件が2〜3個なら、ANDとORを組み合わせたWHEREのほうが読みやすいこともあります。",
+      "code": "SELECT name, department, salary\nFROM employees\nWHERE\n  CASE\n    WHEN department = '営業' THEN salary >= 350000\n    ELSE salary >= 400000\n  END;",
+      "resultTable": {
+        "headers": [
+          "name",
+          "department",
+          "salary"
+        ],
+        "rows": [
+          [
+            "北野",
+            "開発",
+            "400000"
           ],
           [
+            "中央",
+            "営業",
+            "350000"
+          ],
+          [
+            "大和",
+            "開発",
+            "400000"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "ORDER BYの中でCASEを使い、決めた順番に並べる",
+      "body": "部署を「開発、営業、それ以外」の順に並べたいとき、部署名の文字の順ではこの並びになりません。ORDER BYにCASEを書いて、開発に1、営業に2、それ以外に3を割り当てると、その数の小さい順に並びます。同じ部署の中はidの順にしています。CASEが返す1・2・3は並べ替えにだけ使われ、結果の列には出ません。",
+      "code": "SELECT name, department\nFROM employees\nORDER BY\n  CASE department\n    WHEN '開発' THEN 1\n    WHEN '営業' THEN 2\n    ELSE 3\n  END,\n  id;",
+      "resultTable": {
+        "headers": [
+          "name",
+          "department"
+        ],
+        "rows": [
+          [
+            "北野",
+            "開発"
+          ],
+          [
+            "大和",
+            "開発"
+          ],
+          [
+            "青木",
+            "営業"
+          ],
+          [
+            "中央",
+            "営業"
+          ],
+          [
+            "恵比寿",
+            "サポート"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "UPDATEでCASEを使い、行ごとに違う値へ更新する",
+      "body": "UPDATEのSETにCASEを書くと、1回のUPDATEで行ごとに違う値を設定できます。ここでは営業の月給を1万円、開発の月給を2万円上げます。ELSE salaryは「それ以外の行は今の値のまま」という意味です。ELSEを省くと、どのWHENにも一致しない行のsalaryがNULLで上書きされてしまいます。RETURNINGは更新後の行を表示するPostgreSQLの書き方です。恵比寿さんの月給は元からNULLで、そのまま残ります。",
+      "code": "UPDATE employees\nSET salary =\n  CASE\n    WHEN department = '営業' THEN salary + 10000\n    WHEN department = '開発' THEN salary + 20000\n    ELSE salary\n  END\nRETURNING name, department, salary;",
+      "resultTable": {
+        "headers": [
+          "name",
+          "department",
+          "salary"
+        ],
+        "rows": [
+          [
+            "青木",
+            "営業",
+            "310000"
+          ],
+          [
+            "北野",
+            "開発",
+            "420000"
+          ],
+          [
+            "中央",
+            "営業",
+            "360000"
+          ],
+          [
+            "大和",
+            "開発",
+            "420000"
+          ],
+          [
+            "恵比寿",
             "サポート",
-            "0"
+            "NULL"
           ]
         ]
       }
@@ -351,6 +674,10 @@ export const caseTopic: SqlTopic = {
     {
       "question": "WHENの条件を複数満たすとどうなりますか？",
       "answer": "上から最初にtrueになったWHENの値が返ります。40万円以上と35万円以上のように範囲が重なる場合は、優先したい条件を先に書きます。"
+    },
+    {
+      "question": "CASE WHENで複数条件を書くにはどうしますか？",
+      "answer": "1つのWHENの中で、条件をANDやORでつなぎます。WHEN department = '営業' AND salary >= 350000のように、別々の列を見る条件も組み合わせられます。分類を3つ以上に分けたいときは、WHENそのものを増やします。"
     },
     {
       "question": "CASE salary WHEN NULLで未入力を判定できますか？",
@@ -380,6 +707,11 @@ export const caseTopic: SqlTopic = {
       "label": "PostgreSQL公式：集約関数",
       "url": "https://www.postgresql.org/docs/current/functions-aggregate.html",
       "description": "SUMによる数値の合計"
+    },
+    {
+      "label": "PostgreSQL公式：UPDATE",
+      "url": "https://www.postgresql.org/docs/current/sql-update.html",
+      "description": "SETに書ける式とRETURNING"
     }
   ],
   "related": [
@@ -387,7 +719,10 @@ export const caseTopic: SqlTopic = {
     "select",
     "where",
     "group-by",
-    "having"
+    "having",
+    "like",
+    "update",
+    "order-by"
   ],
   "practiceCategory": "case"
 };

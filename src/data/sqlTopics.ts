@@ -21,6 +21,7 @@ export type SqlTopic = {
   faqs: { question: string; answer: string }[];
   references: { label: string; url: string; description: string }[];
   related: string[];
+  seeAlso?: { label: string; href: string }[]; // /sql/ 以外の関連ページ（/postgresql/ など）。関連構文の並びに足す
   practiceCategory?: string;
   practiceQuestionId?: string; // ガイド内に埋め込む問題。省略時はカテゴリの1問目
 };

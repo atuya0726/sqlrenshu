@@ -81,7 +81,7 @@ const jsonLd = [
             <a class="btn focus-ring px-8 py-4 text-base" href={`/practice/${topic.practiceCategory}/`}>{topic.label}の本格演習へ →</a>
           </div>
         </>}
-        <h2>関連構文</h2><div class="not-prose mt-3 flex flex-wrap gap-2">{topic.related.map((slug) => <a class="chip focus-ring" href={`/sql/${slug}/`}>{sqlTopicBySlug[slug]?.label ?? slug}</a>)}</div>
+        <h2>関連構文</h2><div class="not-prose mt-3 flex flex-wrap gap-2">{topic.related.map((slug) => <a class="chip focus-ring" href={`/sql/${slug}/`}>{sqlTopicBySlug[slug]?.label ?? slug}</a>)}{topic.seeAlso?.map((link) => <a class="chip focus-ring" href={link.href}>{link.label}</a>)}</div>
         <h2>{topic.label}についてよくある質問</h2>
         <dl class="not-prose mt-4 divide-y divide-line border-y border-line">
           {topic.faqs.map((faq) => <div class="py-5"><dt class="font-medium">{faq.question}</dt><dd class="mt-2 text-sm leading-7 text-muted">{faq.answer}</dd></div>)}
