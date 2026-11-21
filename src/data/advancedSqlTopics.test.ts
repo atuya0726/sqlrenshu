@@ -64,6 +64,8 @@ for (const topic of sqlTopics.filter((topic) => topic.slug !== 'select')) {
         } else {
           expect(rows).toEqual(section.resultTable!.rows);
         }
+        // 「続けて実行するとエラーになる」例は、同じ状態で実行して、掲載したエラー文と照合する。
+        if (section.failing) await expect(db.exec(section.failing.code)).rejects.toThrow(section.failing.error);
       });
     }
 
@@ -233,6 +235,38 @@ for (const topic of sqlTopics.filter((topic) => topic.slug !== 'select')) {
       it('restores deleted rows after ROLLBACK', async () => {
         await db.exec('BEGIN; DELETE FROM products; ROLLBACK;');
         expect((await db.query('SELECT COUNT(*) FROM products')).rows).toEqual([{ count: 5 }]);
+      });
+    }
+
+    if (topic.slug === 'create-table') {
+      it('reports the errors quoted in the mistakes', async () => {
+        await expect(db.exec('CREATE TABLE products (\n  id integer,\n  name text,\n);')).rejects.toThrow('syntax error at or near ")"');
+        await expect(db.exec('CREATE TABLE user (id integer);')).rejects.toThrow('syntax error at or near "user"');
+        await expect(db.exec('CREATE TABLE order (id integer);')).rejects.toThrow('syntax error at or near "order"');
+        await expect(db.exec('CREATE TABLE orders (id integer PRIMARY KEY, shop_id integer REFERENCES shops (id));')).rejects.toThrow('relation "shops" does not exist');
+      });
+      it('refuses to delete or drop a referenced parent, and cascades when asked', async () => {
+        await db.exec('CREATE TABLE orders (id integer PRIMARY KEY, customer_id integer NOT NULL REFERENCES customers (id)); INSERT INTO orders VALUES (1, 1);');
+        await expect(db.exec('DELETE FROM customers WHERE id = 1;')).rejects.toThrow('violates foreign key constraint');
+        await expect(db.exec('DROP TABLE customers;')).rejects.toThrow('cannot drop table customers');
+        await db.exec('DROP TABLE orders; CREATE TABLE orders (id integer PRIMARY KEY, customer_id integer NOT NULL REFERENCES customers (id) ON DELETE CASCADE); INSERT INTO orders VALUES (1, 1); DELETE FROM customers WHERE id = 1;');
+        expect((await db.query('SELECT COUNT(*) FROM orders')).rows).toEqual([{ count: 0 }]);
+      });
+      it('does not carry constraints over with CREATE TABLE AS', async () => {
+        await db.exec('CREATE TABLE customers_backup AS SELECT id, name FROM customers WHERE id >= 2;');
+        expect((await db.query("SELECT is_nullable FROM information_schema.columns WHERE table_name = 'customers_backup'")).rows).toEqual([{ is_nullable: 'YES' }, { is_nullable: 'YES' }]);
+        expect((await db.query("SELECT COUNT(*) FROM pg_constraint WHERE conrelid = 'customers_backup'::regclass AND contype IN ('p', 'u', 'f', 'c')")).rows).toEqual([{ count: 0 }]);
+      });
+      it('lets NULL pass a CHECK constraint and allows repeated NULLs under UNIQUE', async () => {
+        await db.exec('CREATE TABLE t (price integer CHECK (price >= 0), code text UNIQUE); INSERT INTO t VALUES (NULL, NULL), (NULL, NULL);');
+        expect((await db.query('SELECT COUNT(*) FROM t')).rows).toEqual([{ count: 2 }]);
+      });
+      it('rejects a direct value for a GENERATED ALWAYS identity column and names a custom constraint in the error', async () => {
+        await db.exec('CREATE TABLE tickets (id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY, title text NOT NULL);');
+        await expect(db.exec("INSERT INTO tickets (id, title) VALUES (5, 'x');")).rejects.toThrow('cannot insert a non-DEFAULT value into column "id"');
+        await db.exec('CREATE TABLE products (id integer PRIMARY KEY, price integer NOT NULL CONSTRAINT price_not_negative CHECK (price >= 0));');
+        await expect(db.exec('INSERT INTO products VALUES (1, -1);')).rejects.toThrow('"price_not_negative"');
+        await expect(db.exec('DROP TABLE IF EXISTS no_such_table;')).resolves.toBeDefined();
       });
     }
 

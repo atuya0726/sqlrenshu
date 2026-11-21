@@ -52,24 +52,6 @@
 - 確かめること: UPDATE の例は、実行のたびに表が元に戻る形で動くかを、ガイドの実行の仕組みで確かめる
 - 評価: 実施の28日後に、`/sql/case/` の表示回数と順位を見る
 
-### 4. 新しいガイド `/sql/create-table/`（CREATE TABLE と制約）
-
-- 優先度: 高（「競合にあって自分に無いテーマ」の1本目。仕様1の次に実装する）
-- 種類: 新しいガイド。問題は採点の方法を確かめてから決める
-- 対象の検索語: Search Console には出ていない（受け皿が無いため）。サジェストは「sql create table」9語（書き方、if not exists、primary key、default、データ型、unique、select）、「外部キー」12語、「制約」12語
-- 根拠: 目次を読めた競合9サイトのうち6サイトが CREATE TABLE、ALTER、DROP のページを持つ。自分のサイトでは、CREATE TABLE は演習データの準備に出るだけで、教えるページが無い。PGlite で CREATE TABLE、主キー、UNIQUE、NOT NULL、DEFAULT、CHECK、外部キーとその違反エラーが動くことは 2026-11-21 に確かめた
-- 足すもの（見出しの案）:
-  - h2「CREATE TABLEで表を作る」: 列名と型だけの最小の例。作った表に INSERT して SELECT する
-  - h2「主キー（PRIMARY KEY）を付ける」: 重複を入れたときのエラーを実際に出す
-  - h2「NOT NULL・UNIQUE・DEFAULT・CHECK」: それぞれ違反したときのエラー文つき
-  - h2「外部キー（REFERENCES）で表をつなぐ」: 親に無い値を入れたときのエラー
-  - h2「IF NOT EXISTSで、すでにある表を作ろうとしない」
-  - h2「CREATE TABLE AS SELECTで結果から表を作る」
-  - よくある間違い、FAQ（主キーと UNIQUE の違い、型の選び方は `/sql/cast/` へ）
-- 確かめること: 構文と制約の説明は PostgreSQL 公式ドキュメントの CREATE TABLE と「制約」の章。ガイドの実行欄で DDL を流したあと、表が元に戻るか（`src/lib/pglite.ts` はスキーマを作り直している）。問題にする場合、DDL の答えをどう採点するか（結果の表ではなく、`information_schema` か、後続の INSERT の成否で比べる形が要る）。採点の仕組みに手を入れる必要があれば、最初はガイドだけ出す
-- 件数: ガイドが増えるので、テストと `docs/architecture.md` の件数、sitemap、ガイド一覧を直す
-- 評価: 実施の28日後に、`/sql/create-table/` がインデックスされたか、表示回数、出た検索語を見る。表示が出れば、ALTER TABLE、インデックスと EXPLAIN、ビュー、トランザクションへ続ける
-
 ### 5. 新しいガイド `/sql/distinct/`（DISTINCT の専用ページ）
 
 - 優先度: 中
@@ -134,7 +116,7 @@ Search Console の直近28日（2026-10-22〜11-18）のページ別と検索語
 
 | テーマ | 持つ競合（9のうち） | サジェスト | 自分 | PGlite で動くか（11/21 に確認） | 扱い |
 |---|---|---|---|---|---|
-| CREATE TABLE、ALTER、DROP、制約 | 6 | create table 9、alter table 9、外部キー 12、制約 12 | 無い | 動く（制約違反のエラーも出る） | 仕様4。続けて ALTER TABLE |
+| CREATE TABLE、ALTER、DROP、制約 | 6 | create table 9、alter table 9、外部キー 12、制約 12 | 無い | 動く（制約違反のエラーも出る） | 2026-11-21 に `/sql/create-table/` と演習8問を公開。表示が出れば ALTER TABLE へ続ける |
 | ビュー | 6 | 6 | 無い | 動く | 候補 |
 | インデックス | 5 | 12 | 無い | 動く（EXPLAIN で Index Scan が出る） | 候補。EXPLAIN と組にする |
 | 実行計画（EXPLAIN） | 1 | 7 | 無い | 動く（EXPLAIN ANALYZE も） | 候補。競合が少ない |

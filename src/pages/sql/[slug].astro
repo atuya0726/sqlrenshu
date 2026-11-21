@@ -52,6 +52,11 @@ const jsonLd = [
           </div>}
           <div class="not-prose mt-5"><CodeBlock code={section.code} /></div>
           {section.resultTable && <GuideTable table={section.resultTable} caption="実行結果" />}
+          {section.failing && <div class="not-prose mt-6 rounded-xl border border-line p-5">
+            <p class="text-sm font-medium">続けて次のSQLを実行すると、エラーになります。</p>
+            <div class="mt-3"><CodeBlock code={section.failing.code} /></div>
+            <p class="mt-3 text-sm text-muted">エラー：<code>{section.failing.error}</code></p>
+          </div>}
         </>)}
         {topic.notes.map((note, index) => <aside id={index === 0 ? 'tips' : undefined} class="not-prose mt-8 border-l-4 border-brand py-1 pl-5">
           <p class="flex items-center gap-2 font-mono text-sm font-semibold text-brand">

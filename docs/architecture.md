@@ -201,4 +201,4 @@ Astroは`output: static`、Cloudflare adapterなし。`pnpm build`の`dist/`を`
 9. AdSlot、BookRecommendation、BookListと商品一元管理。
 10. モバイル、アクセシビリティ、全静的ルート、Cloudflare previewを確認して公開。
 
-初期実装は上記1〜9の薄い縦切りを含む。現在は全353問の模範解答をPGliteで検証する（INSERT・UPDATE・DELETEは実行後の`stateQuery`の結果で採点）。GROUP BY以降のガイドも基本構文・本文・Tips・間違いの各SQLを実行検証する。実ブラウザでの編集・採点操作のE2Eと正式ドメイン設定は公開前の確認事項である。
+初期実装は上記1〜9の薄い縦切りを含む。現在は全361問の模範解答をPGliteで検証する（INSERT・UPDATE・DELETEは実行後の`stateQuery`の結果で採点。CREATE TABLEは、作った表の定義をカタログから読む`stateQuery`で採点）。GROUP BY以降のガイドも基本構文・本文・Tips・間違いの各SQLを実行検証する。実ブラウザでの編集・採点操作のE2Eと正式ドメイン設定は公開前の確認事項である。

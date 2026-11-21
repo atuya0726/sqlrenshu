@@ -9,7 +9,7 @@
 
 ## 現状（2026-11-21）
 
-- 公開: https://sqlrenshu.com/ 。問題353、ガイド48、PostgreSQL 固有機能5、ほか一覧と必須ページ。
+- 公開: https://sqlrenshu.com/ 。問題361、ガイド49、PostgreSQL 固有機能5、ほか一覧と必須ページ。
 - 計測: Search Console と Cloudflare Web Analytics をスキルで取得できる。Web Analytics は 9月から計測されている。
 - 収益: AdSense は審査待ち。広告枠（AdSlot）とアフィリエイト（affiliateOffers）は枠だけで中身なし。
 - 必須ページ: `/about/`、`/privacy/`、`/contact/`。運営者名は「SQL練習室 運営者」、連絡先はメール。
@@ -36,6 +36,7 @@
 | 2026-11-13 | 全ページ | 9/16 版から新版へ入れ替え（ガイド34本を追加、問題ページの noindex を外す、title を検索語に合わせる） | 表示回数とインデックス数の増加。ガイド4本（case、inner-join、select、window-functions）の順位 | 2026-12-11 | |
 | 2026-11-13 | `/sql/inner-join/` | LEFT JOIN との比較セクションを追加 | 「sql left join vs inner join」（実施前は順位11） | 2026-12-11 | |
 | 2026-11-19 | `/sql/left-join/`、`/postgresql/returning/`、`/postgresql/on-conflict/` | 演習へのリンクを追加。left-join には問題を埋め込み | ガイドから問題ページへの回遊（Web Analytics のページ別） | 2026-12-17 | |
+| 2026-11-21 | `/sql/create-table/`（新規）、`/practice/create-table/`（8問） | CREATE TABLE と制約のガイドを新設。制約違反のエラー例つき。演習は作った表の定義で採点 | 競合9サイト中6サイトが持ち、自分に無かったテーマ。インデックスされるか、表示回数、出る検索語（create table、主キー、外部キー、制約） | 2026-12-19 | |
 
 ## ユーザーに依頼中
 
@@ -75,3 +76,4 @@
 - 2026-11-21: `http://sqlrenshu.com/` が 200 を返し `https://` へ転送されないことを確かめ、「常に HTTPS を使用」と Bing Webmaster Tools の登録をユーザーに依頼。次回（11/23 月）は週次の数字を見て、仕様1（`/sql/case/` の複数条件、LIKE、入れ子）を実装する。月曜だが未実装の仕様が3件あるため。
 - 2026-11-21: ユーザーが「常に HTTPS を使用」をオンにした。`http://sqlrenshu.com/sql/with-recursive/` が 301 で `https://` へ転送されることを確認。Bing Webmaster Tools は登録しない（ユーザーの判断。Google 向けの改善で Bing も伸びると見る）。Bing 向けの依頼は今後出さない。
 - 2026-11-21: サイト全体の品ぞろえを競合9サイトと比べた。自分に無いのは DDL（CREATE TABLE と制約は6サイト、ビュー6、インデックス5）と、DISTINCT、COUNT、BETWEEN の専用ページ。PGlite で DDL、EXPLAIN、ビュー、トランザクション、トリガー、GRANT が動くことを確かめた。仕様4（`/sql/create-table/`）と仕様5（`/sql/distinct/`）を足した。実装の順は 仕様1 → 仕様4 → 仕様2。
+- 2026-11-21: ユーザーの指示で仕様4を前倒しで実装。`/sql/create-table/`（11節。データ型、主キー、NOT NULL、DEFAULT、UNIQUE、CHECK、外部キー、複合主キー、IF NOT EXISTS、CREATE TABLE AS、DROP TABLE）と演習8問を公開。ガイドの節に「続けて実行するとエラーになる例」を出せるようにした（`failing`。エラー文はテストで照合）。仕様は公式ドキュメントで裏取りし、明記の無い点（CREATE TABLE AS で制約が付かない、エラー文）は PGlite で実行して確かめた。テスト1064件合格。次回（11/23 月）は仕様1（`/sql/case/`）。

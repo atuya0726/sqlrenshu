@@ -12,7 +12,10 @@ export type SqlTopic = {
   sampleIntro?: string;
   sampleTables?: (GuideTable & { caption: string })[];
   syntax: string;
-  sections: { heading: string; body: string; code: string; table?: GuideTable; resultTable?: GuideTable }[];
+  sections: {
+    heading: string; body: string; code: string; table?: GuideTable; resultTable?: GuideTable;
+    failing?: { code: string; error: string }; // 節のSQLに続けて実行するとエラーになる例（制約違反など）。エラー文はテストで照合する
+  }[];
   mistakes: { title: string; body: string; code?: string }[];
   notes: { title: string; body: string; code?: string }[];
   faqs: { question: string; answer: string }[];

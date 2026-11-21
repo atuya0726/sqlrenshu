@@ -97,7 +97,8 @@ export type QuestionCategory =
   | 'insert-select'
   | 'update-from'
   | 'delete-using'
-  | 'merge';
+  | 'merge'
+  | 'create-table';
 
 export type ProgressState = {
   version: 1;

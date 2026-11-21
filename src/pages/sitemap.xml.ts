@@ -12,6 +12,12 @@ const updatedPaths: Record<string, string> = {
   '/sql/left-join/': '2026-11-19',
   '/postgresql/returning/': '2026-11-19',
   '/postgresql/on-conflict/': '2026-11-19',
+  // 2026-11-21: CREATE TABLE のガイドと演習8問を追加（一覧ページにも項目が増えた）。
+  '/sql/': '2026-11-21',
+  '/practice/': '2026-11-21',
+  '/sql/create-table/': '2026-11-21',
+  '/practice/create-table/': '2026-11-21',
+  ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`/practice/create-table/create-table-0${index + 1}/`, '2026-11-21'])),
 };
 
 export function GET({ site }: { site?: URL }) {
