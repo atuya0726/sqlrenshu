@@ -436,7 +436,7 @@ export const topic: SqlTopic = {
     },
     {
       "question": "作った表に、あとから列を足したり制約を付けたりできる？",
-      "answer": "できます。表を作り直さずに、ALTER TABLE products ADD COLUMN stock integerのようにALTER TABLEで列や制約を追加・変更します。"
+      "answer": "できます。表を作り直さずに、ALTER TABLE products ADD COLUMN stock integerのようにALTER TABLEで列や制約を追加・変更します。書き方は、関連構文のALTER TABLEのガイドにまとめています。"
     },
     {
       "question": "外部キーで参照されている行を削除するとどうなる？",
@@ -486,6 +486,7 @@ export const topic: SqlTopic = {
     }
   ],
   "related": [
+    "alter-table",
     "insert",
     "update",
     "delete",

@@ -49,6 +49,7 @@ export const categoryLabels: Record<string, string> = {
   'merge': 'MERGE',
   'create-table': 'CREATE TABLE',
   'distinct': 'DISTINCT',
+  'alter-table': 'ALTER TABLE',
 };
 
 // 演習一覧の並び順（教える順）と一行説明。学習パス・「続きから」・次のカテゴリ導線の基準になる。
@@ -102,6 +103,7 @@ const practiceOrder: [slug: string, description: string][] = [
   ['delete-using', '別の表の条件で削除する'],
   ['merge', 'あれば更新、なければ追加を1文で書く'],
   ['create-table', '列・データ型・制約を決めて表を作る'],
+  ['alter-table', '列の追加・削除・型変更で表の定義を変える'],
 ];
 
 // src/data/topics/ と src/questions/topics/ に1構文1ファイルで置くガイド・演習の掲載順。
@@ -135,10 +137,11 @@ export const extraTopicSlugs: string[] = [
   'delete-using',
   'merge',
   'create-table',
+  'alter-table',
 ];
 
 // 実行後の表の状態で採点・検証する（更新系の）追加構文。
-export const extraDmlSlugs: string[] = ['insert-select', 'update-from', 'delete-using', 'merge', 'create-table'];
+export const extraDmlSlugs: string[] = ['insert-select', 'update-from', 'delete-using', 'merge', 'create-table', 'alter-table'];
 
 // 問題がまだ無いカテゴリも含む全候補。画面では learningPath.ts の activePracticeCategories を使う。
 export const practiceCategories = practiceOrder.map(([slug, description]) => ({
@@ -165,7 +168,7 @@ export const practiceGroups: PracticeGroup[] = [
   { id: 'series-regexp', stage: '応用', title: '日付計算・連番・正規表現', slugs: ['date-arithmetic', 'generate-series', 'regexp'] },
   { id: 'array-json', stage: '応用', title: '配列とJSON', slugs: ['array', 'jsonb'] },
   { id: 'dml-advanced', stage: '応用', title: '更新の応用', slugs: ['insert-select', 'update-from', 'delete-using', 'merge'] },
-  { id: 'ddl', stage: '応用', title: 'テーブルの作成', slugs: ['create-table'] },
+  { id: 'ddl', stage: '応用', title: 'テーブルの作成と変更', slugs: ['create-table', 'alter-table'] },
 ];
 
 const groupBySlug = new Map(practiceGroups.flatMap((group) => group.slugs.map((slug) => [slug, group] as const)));

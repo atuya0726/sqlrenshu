@@ -12,10 +12,7 @@ const updatedPaths: Record<string, string> = {
   '/sql/left-join/': '2026-11-19',
   '/postgresql/returning/': '2026-11-19',
   '/postgresql/on-conflict/': '2026-11-19',
-  // 2026-11-21: CREATE TABLE のガイドと演習8問を追加（一覧ページにも項目が増えた）。
-  '/sql/': '2026-11-21',
-  '/practice/': '2026-11-21',
-  '/sql/create-table/': '2026-11-21',
+  // 2026-11-21: CREATE TABLE のガイドと演習8問を追加（ガイド本体と一覧ページは 11/26 にも変更したので、下に書く）。
   '/practice/create-table/': '2026-11-21',
   ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`/practice/create-table/create-table-0${index + 1}/`, '2026-11-21'])),
   // 2026-11-21: CASE と UNION のガイドに節を追加。DISTINCT のガイドと演習8問を追加。
@@ -24,6 +21,13 @@ const updatedPaths: Record<string, string> = {
   '/sql/distinct/': '2026-11-21',
   '/practice/distinct/': '2026-11-21',
   ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`/practice/distinct/distinct-0${index + 1}/`, '2026-11-21'])),
+  // 2026-11-26: ALTER TABLE のガイドと演習10問を追加（一覧ページにも項目が増えた）。create-table から alter-table へリンク。
+  '/sql/': '2026-11-26',
+  '/practice/': '2026-11-26',
+  '/sql/create-table/': '2026-11-26',
+  '/sql/alter-table/': '2026-11-26',
+  '/practice/alter-table/': '2026-11-26',
+  ...Object.fromEntries(Array.from({ length: 10 }, (_, index) => [`/practice/alter-table/alter-table-${String(index + 1).padStart(2, '0')}/`, '2026-11-26'])),
 };
 
 export function GET({ site }: { site?: URL }) {

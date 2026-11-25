@@ -299,6 +299,47 @@ for (const topic of sqlTopics.filter((topic) => topic.slug !== 'select')) {
       });
     }
 
+    if (topic.slug === 'alter-table') {
+      it('reports the errors quoted in the mistakes', async () => {
+        await expect(db.exec('ALTER TABLE members MODIFY plan varchar(20);')).rejects.toThrow('syntax error at or near "MODIFY"');
+        await expect(db.exec('ALTER TABLE members CHANGE name full_name text;')).rejects.toThrow('syntax error at or near "CHANGE"');
+        await expect(db.exec('ALTER TABLE members ADD (phone text, kana text);')).rejects.toThrow('syntax error at or near "("');
+        await expect(db.exec('ALTER TABLE members RENAME COLUMN name TO full_name, ADD COLUMN phone text;')).rejects.toThrow('syntax error at or near ","');
+        await db.exec('ALTER TABLE members ADD COLUMN phone text, ADD COLUMN kana text;');
+      });
+      it('leaves the table unchanged when a type change or a combined statement fails', async () => {
+        await expect(db.exec('ALTER TABLE members ALTER COLUMN plan TYPE integer USING plan::integer;')).rejects.toThrow('invalid input syntax for type integer: "free"');
+        await expect(db.exec('ALTER TABLE members ALTER COLUMN plan TYPE varchar(3);')).rejects.toThrow('value too long');
+        await expect(db.exec('ALTER TABLE members ADD COLUMN phone text, ALTER COLUMN email SET NOT NULL;')).rejects.toThrow('contains null values');
+        expect((await db.query("SELECT column_name, character_maximum_length FROM information_schema.columns WHERE table_name = 'members' AND column_name IN ('plan', 'phone')")).rows).toEqual([{ column_name: 'plan', character_maximum_length: 10 }]);
+      });
+      it('drops NOT NULL and DEFAULT, and a column without a default becomes NULL again', async () => {
+        await db.exec("ALTER TABLE members ALTER COLUMN plan SET NOT NULL, ALTER COLUMN plan SET DEFAULT 'free'; ALTER TABLE members ALTER COLUMN plan DROP NOT NULL, ALTER COLUMN plan DROP DEFAULT; INSERT INTO members (id, name) VALUES (4, '大和');");
+        expect((await db.query('SELECT plan FROM members WHERE id = 4')).rows).toEqual([{ plan: null }]);
+      });
+      it('rejects a foreign key or unique constraint that existing rows violate, and adds a primary key', async () => {
+        await db.exec("CREATE TABLE plans (code varchar(10) PRIMARY KEY); INSERT INTO plans VALUES ('free'), ('pro');");
+        await expect(db.exec('ALTER TABLE members ADD CONSTRAINT members_plan_fkey FOREIGN KEY (plan) REFERENCES plans (code);')).rejects.toThrow('violates foreign key constraint "members_plan_fkey"');
+        await db.exec("UPDATE members SET plan = 'free' WHERE id = 3;");
+        await expect(db.exec('ALTER TABLE members ADD CONSTRAINT members_plan_key UNIQUE (plan);')).rejects.toThrow('could not create unique index');
+        await db.exec('ALTER TABLE members DROP CONSTRAINT members_pkey; ALTER TABLE members ADD PRIMARY KEY (id);');
+        expect((await db.query("SELECT conname FROM pg_constraint WHERE conrelid = 'members'::regclass")).rows).toEqual([{ conname: 'members_pkey' }]);
+      });
+      it('refuses to drop a column used by a view unless CASCADE is given, and drops its own constraint with it', async () => {
+        await db.exec('CREATE VIEW member_plans AS SELECT id, plan FROM members; ALTER TABLE members ADD CONSTRAINT members_email_key UNIQUE (email);');
+        await expect(db.exec('ALTER TABLE members DROP COLUMN plan;')).rejects.toThrow('cannot drop column plan of table members because other objects depend on it');
+        await db.exec('ALTER TABLE members DROP COLUMN plan CASCADE; ALTER TABLE members DROP COLUMN email;');
+        expect((await db.query("SELECT COUNT(*) FROM information_schema.views WHERE table_name = 'member_plans'")).rows).toEqual([{ count: 0 }]);
+        expect((await db.query("SELECT conname FROM pg_constraint WHERE conrelid = 'members'::regclass")).rows).toEqual([{ conname: 'members_pkey' }]);
+      });
+      it('restores a dropped column on ROLLBACK and keeps an existing column with IF NOT EXISTS', async () => {
+        await db.exec('BEGIN; ALTER TABLE members DROP COLUMN email; ROLLBACK;');
+        expect((await db.query('SELECT email FROM members WHERE id = 1')).rows).toEqual([{ email: 'aoki@example.com' }]);
+        await db.exec('ALTER TABLE members ADD COLUMN IF NOT EXISTS email integer;');
+        expect((await db.query("SELECT data_type FROM information_schema.columns WHERE table_name = 'members' AND column_name = 'email'")).rows).toEqual([{ data_type: 'text' }]);
+      });
+    }
+
     if (topic.slug === 'having') {
       it('verifies the FAQ about HAVING without GROUP BY', async () => {
         expect((await db.query('SELECT COUNT(*) FROM employees HAVING COUNT(*) >= 5')).rows).toEqual([{ count: 5 }]);
