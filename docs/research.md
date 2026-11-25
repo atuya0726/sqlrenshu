@@ -6,33 +6,9 @@
 
 ## 仕様（実装待ち）
 
-2026-11-23 の調査の回で2件を作った。木曜（11/26）は仕様1を実装する。
+2026-11-23 の調査の回で2件を作り、11/26 に1件（`/sql/alter-table/`）を実装した。残りは1件。次の調査の回（11/30）で足す。
 
-### 仕様1: `/sql/alter-table/`（新しいガイド）と演習
-
-- 優先度: 高
-- 種類: 新しいガイド1本と、対応する問題（`/practice/alter-table/`、8問を目安）
-- 対象の検索語: sql alter table、alter table カラム追加、alter table add column、postgresql alter table 型変更、alter table drop column、alter table not null（サジェストは「sql alter table」9語、「alter table」10語、「postgresql alter table」9語。Search Console にはまだ出ていない。自分にページが無いため）
-- 根拠: 「サイト全体の品ぞろえの差」で9サイト中6サイトが DDL を持つ。`/sql/create-table/` の FAQ が ALTER TABLE に触れているが、リンク先が無い。11/23 に読んだ競合9本のうち、変更後の結果を本文で見せるのは1本（RJC）、既存行がどうなるかまで説明するのは3本、制約に反する既存データのエラー例は3本、PostgreSQL で列の位置を指定できないと明記するのは1本、その場で実行できる環境と練習問題は0本。PostgreSQL 専用の5本は古い（2016〜2023年）か浅い
-- 足すもの（h2 の順）:
-  - 例で使う表／ALTER TABLE の基本構文
-  - ADD COLUMN で列を追加する（既存行は NULL になる。結果表を見せる）
-  - DEFAULT を付けて列を追加する（既存行に既定値が入る）
-  - NOT NULL の列を既存行のある表に足す（DEFAULT なしだとエラー、DEFAULT ありなら通る。`failing` でエラー例）
-  - 列を足す位置は指定できない（常に末尾。MySQL の AFTER に当たるものは無い。サジェスト「add column 位置」）
-  - DROP COLUMN で列を削除する（IF EXISTS、CASCADE は Tips）
-  - ALTER COLUMN ... TYPE で型や桁数を変える（varchar の桁数変更、text から integer は USING が要る。USING なしのエラー例と、USING ありの成功例）
-  - RENAME COLUMN と RENAME TO で名前を変える
-  - SET NOT NULL、DROP NOT NULL（既存の NULL があると失敗するエラー例）、SET DEFAULT、DROP DEFAULT
-  - ADD CONSTRAINT で制約を足す（UNIQUE、CHECK、外部キー、主キー。既存行が反するとエラーになる例）、DROP CONSTRAINT
-  - 1つの ALTER TABLE に複数の変更をカンマで並べる
-  - よくある間違い（MySQL の MODIFY、CHANGE、AFTER は PostgreSQL では使えない）／FAQ（Oracle、MySQL との違いを1件、ロックの注意を1件）
-- 入れないもの: ロックの実測、NOT VALID、オンライン DDL（RJC が詳しく、ブラウザ内の実行環境では示せない。FAQ で触れるだけ）
-- 確かめること: 公式の ALTER TABLE のページで確認済みの点（11/23、英語の current 版）: DEFAULT 付きの ADD COLUMN は表を書き換えない、USING は暗黙か代入のキャストが無いとき必須、SET NOT NULL は NULL があると使えない、ADD CONSTRAINT は既存行を検査する、DROP COLUMN の CASCADE、RENAME 以外は1文に並べられる、位置指定の構文は無い。公式に載っていないエラー文（NOT NULL 列の追加、制約違反、USING なしの型変更）は PGlite で実行して確かめ、テストで照合する。演習の採点は `/practice/create-table/` と同じく表の定義で行う
-- 仕上げ: `/sql/create-table/` の FAQ と関連構文から `/sql/alter-table/` へリンクする。件数（ガイド、問題）をテストと `docs/architecture.md` で直す
-- 評価: 実施の28日後に、インデックスされたか、表示回数、出る検索語を見る
-
-### 仕様2: `/sql/insert/` に5節を足す
+### 仕様1: `/sql/insert/` に5節を足す
 
 - 優先度: 中
 - 種類: 既存ページの加筆。title と description は変えない
@@ -71,7 +47,7 @@ Search Console の直近28日（2026-10-22〜11-18）のページ別と検索語
 | RETURNING | `/postgresql/returning/` | 28、7.1 | postgresql returning（4、7.5）、returning postgres（3、6.0）、postgresql update returning（2、8.0） | 伸ばせる | INSERT、UPDATE、DELETE の例を扱い済み。同上 | 様子見 |
 | DISTINCT ON | `/postgresql/distinct-on/` | 20、8.1 | sql distinct on（2、9.5） | 伸ばせる | 表示は 11/15 以降に出た。競合調査の候補 | 未調査 |
 | NOT EXISTS | `/sql/exists/` | 16、9.2 | not exists（6、9.8） | 伸ばせる | NOT EXISTS の節と NOT IN との違いは扱い済み。内容の不足は見当たらない | 様子見 |
-| INSERT | `/sql/insert/` | 20、9.0 | sql insert文（5、9.6）、insert into values（4、8.0） | 伸ばせる、派生の検索語 | 11/23 に競合9本を読んだ。列名省略の危険、NULL、連番、リテラル、エラーの実物が無い | 仕様2（11/23） |
+| INSERT | `/sql/insert/` | 20、9.0 | sql insert文（5、9.6）、insert into values（4、8.0） | 伸ばせる、派生の検索語 | 11/23 に競合9本を読んだ。列名省略の危険、NULL、連番、リテラル、エラーの実物が無い | 仕様1（11/23） |
 | LATERAL、FILTER | `/postgresql/lateral/`、`/postgresql/filter/` | 14、7.3／10、6.8 | postgresql join lateral（1、4.0）、sql count filter（1、9〜10） | 伸ばせる | PostgreSQL 固有機能は順位6〜8にそろっている | 未調査 |
 | 文字列関数 | `/sql/string-functions/` | 11、14.2 | postgresql substring（1、89） | 意図に合っていない | 関数ごとのページを求められている可能性がある | 未調査 |
 | NULL と空文字 | `/sql/coalesce/`（出ているのは問題 coalesce-03） | — | postgresql null 空文字（4、11.2） | 派生の検索語 | `/sql/coalesce/` に「空文字はNULLではない」の節がある（11/23 に見出しで確認）。判定、変換、置き換えまで扱うかは未確認 | 候補（11/23） |
@@ -117,7 +93,7 @@ Search Console の直近28日（2026-10-22〜11-18）のページ別と検索語
 
 | テーマ | 持つ競合（9のうち） | サジェスト | 自分 | PGlite で動くか（11/21 に確認） | 扱い |
 |---|---|---|---|---|---|
-| CREATE TABLE、ALTER、DROP、制約 | 6 | create table 9、alter table 9、外部キー 12、制約 12 | 無い | 動く（制約違反のエラーも出る） | 2026-11-21 に `/sql/create-table/` と演習8問を公開。表示が出れば ALTER TABLE へ続ける |
+| CREATE TABLE、ALTER、DROP、制約 | 6 | create table 9、alter table 9、外部キー 12、制約 12 | 無い | 動く（制約違反のエラーも出る） | 2026-11-21 に `/sql/create-table/` と演習8問、11/26 に `/sql/alter-table/` と演習10問を公開 |
 | ビュー | 6 | 6 | 無い | 動く | 候補 |
 | インデックス | 5 | 12 | 無い | 動く（EXPLAIN で Index Scan が出る） | 候補。EXPLAIN と組にする |
 | 実行計画（EXPLAIN） | 1 | 7 | 無い | 動く（EXPLAIN ANALYZE も） | 候補。競合が少ない |
@@ -189,17 +165,17 @@ Search Console の直近28日（2026-10-22〜11-18）のページ別と検索語
 | 基本構文（列名あり） | 9本 | あり |
 | 複数行の VALUES | 5本 | あり |
 | INSERT ... SELECT | 4本 | あり |
-| 列名の省略とその危険 | 4本（書き方だけは別に2本） | 無い → 仕様2 |
-| NULL を入れる | 3本（部分的に5本） | 列の省略で NULL になる説明だけ → 仕様2 |
+| 列名の省略とその危険 | 4本（書き方だけは別に2本） | 無い → 仕様1 |
+| NULL を入れる | 3本（部分的に5本） | 列の省略で NULL になる説明だけ → 仕様1 |
 | DEFAULT | 3本 | あり |
-| エラーの実物 | 3本 | 文章だけ → 仕様2 |
+| エラーの実物 | 3本 | 文章だけ → 仕様1 |
 | 製品ごとの違い | 3本 | 無い（入れない） |
 | 重複時の処理 | 2本 | あり（ON CONFLICT、別ガイドへリンク） |
 | RETURNING | 2本 | あり |
 | 性能、バルク、COPY | 2本 | 無い（入れない） |
-| 引用符のエスケープ | 2本 | 無い → 仕様2 |
-| 自動採番 | 1本（一言は3本） | 無い → 仕様2 |
-| 日付の書き方 | 0本 | 無い → 仕様2 |
+| 引用符のエスケープ | 2本 | 無い → 仕様1 |
+| 自動採番 | 1本（一言は3本） | 無い → 仕様1 |
+| 日付の書き方 | 0本 | 無い → 仕様1 |
 | その場で実行、練習問題 | 0本、1本 | あり |
 
 サジェスト: 「sql insert」複数、select、書き方、複数行、into values、update、nullを入れる。「sql insert文」複数、書き方、select、null、省略、自動採番。「insert into」select、values、複数行、構文、意味。
@@ -208,19 +184,19 @@ Search Console の直近28日（2026-10-22〜11-18）のページ別と検索語
 
 | 論点 | 競合 | 自分 |
 |---|---|---|
-| 列の追加、列の削除 | 9本、9本 | ページが無い → 仕様1 |
-| 型や桁数の変更 | 8本（エラー文まで3本） | 同上 |
-| 列名の変更、表名の変更 | 7本、7本 | 同上 |
-| DEFAULT の設定と削除 | 7本 | 同上 |
-| NOT NULL の追加と削除 | 5本 | 同上 |
-| 追加位置の指定 | 5本（PostgreSQL では不可と明記は1本） | 同上 |
-| 変更後の定義の確認 | 5本（結果を本文で見せるのは1本） | 同上 |
-| 制約の追加と削除 | 4本（主キーは2本） | 同上 |
-| 製品ごとの構文の違い | 4本 | 同上（FAQ で触れる） |
-| DEFAULT や NOT NULL 付きの追加と既存行 | 3本 | 同上 |
-| 既存データが制約に反するエラー例 | 3本 | 同上 |
+| 列の追加、列の削除 | 9本、9本 | 無かった → 11/26 に追加 |
+| 型や桁数の変更 | 8本（エラー文まで3本） | 11/26 に追加 |
+| 列名の変更、表名の変更 | 7本、7本 | 11/26 に追加 |
+| DEFAULT の設定と削除 | 7本 | 11/26 に追加 |
+| NOT NULL の追加と削除 | 5本 | 11/26 に追加 |
+| 追加位置の指定 | 5本（PostgreSQL では不可と明記は1本） | 11/26 に追加 |
+| 変更後の定義の確認 | 5本（結果を本文で見せるのは1本） | 11/26 に追加 |
+| 制約の追加と削除 | 4本（主キーは2本） | 11/26 に追加 |
+| 製品ごとの構文の違い | 4本 | 11/26 に FAQ で追加 |
+| DEFAULT や NOT NULL 付きの追加と既存行 | 3本 | 11/26 に追加 |
+| 既存データが制約に反するエラー例 | 3本 | 11/26 に追加 |
 | ロック、本番での注意 | 3本 | 入れない（FAQ のみ） |
-| 複数の変更を1文で | 2本 | 仕様1 |
-| その場で実行、練習問題 | 0本 | 仕様1 |
+| 複数の変更を1文で | 2本 | 11/26 に追加（演習10問） |
+| その場で実行、練習問題 | 0本 | 11/26 に追加（演習10問） |
 
 サジェスト: 「sql alter table」とは、カラム追加、add column、桁数変更、alter column、add constraint、drop column、primary key。「postgresql alter table」add column、型変更、add column 複数、drop column、not null、add column 位置。
