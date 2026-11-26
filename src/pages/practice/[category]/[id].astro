@@ -1,15 +1,17 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SqlPlayground from '@/components/SqlPlayground.astro';
+import GuideTable from '@/components/GuideTable.astro';
+import { practicePaths } from '@/lib/practicePreview';
 import AdSlot from '@/components/AdSlot.astro';
 import { questions } from '@/questions/catalog';
 import { categoryLabels, guideHrefForCategory } from '@/lib/categories';
 import { nextStep, previousInCategory } from '@/lib/learningPath';
 
 export function getStaticPaths() {
-  return questions.map((question) => ({ params:{ category:question.category, id:question.id }, props:{ question } }));
+  return practicePaths(questions);
 }
-const { question } = Astro.props;
+const { question, preview } = Astro.props;
 const categoryQuestions = questions.filter((item) => item.category === question.category);
 const index = categoryQuestions.findIndex((item) => item.id === question.id);
 // カテゴリ最後の問題では、次のカテゴリの1問目へ進める。
@@ -40,5 +42,21 @@ const jsonLd = [
       {previous && <a class="link focus-ring font-sans" href={previous.href} title={previous.label}>← 前の問題</a>}
     </p>
   </header>
-  <section class="workspace-shell py-8"><SqlPlayground question={question} nextHref={nextHref} nextLabel={nextLabel} guideHref={guideHref} /><AdSlot placement="practice-after-explanation" /></section>
+  <section class="workspace-shell py-8">
+    <SqlPlayground question={question} nextHref={nextHref} nextLabel={nextLabel} guideHref={guideHref}>
+      <div slot="practice-data" class="mt-5 space-y-3">
+        <details>
+          <summary class="focus-ring cursor-pointer text-sm text-brand">使用するテーブルとサンプルデータ</summary>
+          {preview.tables.map((table) => <GuideTable table={table} caption={`${table.name}（全${table.count}行${table.count > table.rows.length ? `・先頭${table.rows.length}行を表示` : ''}）`} />)}
+          {preview.tables.length === 0 && <p class="mt-3 text-sm text-muted">実行前のテーブルはありません。</p>}
+        </details>
+        <details>
+          <summary class="focus-ring cursor-pointer text-sm text-brand">期待する実行結果</summary>
+          <GuideTable table={preview.expected} caption={question.grading.mode === 'table-state' ? '模範解答を実行した後の状態' : '模範解答の実行結果'} />
+          {!question.grading.compareRowOrder && <p class="mt-2 text-sm text-muted">行の並びは一例です。この問題の採点では行順を問いません。</p>}
+        </details>
+      </div>
+    </SqlPlayground>
+    <AdSlot placement="practice-after-explanation" />
+  </section>
 </BaseLayout>

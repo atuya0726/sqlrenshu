@@ -8,27 +8,40 @@ export const prerender = true;
 // 2026-11-13 に全ページを新版へ入れ替えたので、これを既定にする。
 // それ以降に内容を変えたページは、パスと日付をここへ足す。
 const DEFAULT_LASTMOD = '2026-11-13';
+// 11/26 に静的な表を追加した問題の範囲を固定し、将来追加するページに過去の日付を付けない。
+const practiceAtRevision: [number, string[]][] = [
+  [6, ['date-filter', 'date-trunc', 'delete', 'exists', 'insert', 'intersect-except', 'like', 'order-by', 'select', 'string-functions', 'union', 'update', 'with']],
+  [7, ['cast', 'cross-join', 'delete-using', 'full-outer-join', 'insert-select', 'limit-offset', 'nullif', 'update-from']],
+  [8, ['any-all', 'correlated-subquery', 'create-table', 'date-arithmetic', 'distinct', 'generate-series', 'having', 'is-distinct-from', 'join', 'jsonb', 'lag-lead', 'merge', 'not-in', 'ntile', 'percentile-cont', 'regexp', 'rollup', 'self-join', 'string-agg', 'subquery', 'where', 'window-frame', 'with-recursive']],
+  [9, ['array', 'case']],
+  [10, ['alter-table', 'coalesce']],
+  [11, ['window-functions']],
+  [12, ['group-by']],
+];
+const revisedOnNov26 = [
+  '/', '/about/', '/sql/', '/practice/', '/practice/alter-table/',
+  ...practiceAtRevision.flatMap(([count, categories]) => categories.flatMap((category) =>
+    Array.from({ length: count }, (_, i) => `/practice/${category}/${category}-${String(i + 1).padStart(2, '0')}/`))),
+  ...[
+    'alter-table', 'any-all', 'array', 'case', 'cast', 'coalesce', 'correlated-subquery', 'create-table',
+    'cross-join', 'date-arithmetic', 'date-filter', 'date-trunc', 'delete', 'delete-using', 'distinct', 'exists',
+    'full-outer-join', 'generate-series', 'group-by', 'having', 'inner-join', 'insert', 'insert-select', 'intersect-except',
+    'is-distinct-from', 'jsonb', 'lag-lead', 'left-join', 'like', 'limit-offset', 'merge', 'not-in',
+    'ntile', 'nullif', 'order-by', 'percentile-cont', 'regexp', 'rollup', 'select', 'self-join',
+    'string-agg', 'string-functions', 'subquery', 'union', 'update', 'update-from', 'where', 'window-frame',
+    'window-functions', 'with', 'with-recursive',
+  ].map((slug) => `/sql/${slug}/`),
+  ...['distinct-on', 'filter', 'lateral', 'on-conflict', 'returning'].map((slug) => `/postgresql/${slug}/`),
+];
 const updatedPaths: Record<string, string> = {
-  '/sql/left-join/': '2026-11-19',
-  '/postgresql/returning/': '2026-11-19',
-  '/postgresql/on-conflict/': '2026-11-19',
-  // 2026-11-21: CREATE TABLE のガイドと演習8問を追加（ガイド本体と一覧ページは 11/26 にも変更したので、下に書く）。
   '/practice/create-table/': '2026-11-21',
-  ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`/practice/create-table/create-table-0${index + 1}/`, '2026-11-21'])),
-  // 2026-11-21: CASE と UNION のガイドに節を追加。DISTINCT のガイドと演習8問を追加。
-  '/sql/case/': '2026-11-21',
-  '/sql/union/': '2026-11-21',
-  '/sql/distinct/': '2026-11-21',
   '/practice/distinct/': '2026-11-21',
-  ...Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`/practice/distinct/distinct-0${index + 1}/`, '2026-11-21'])),
-  // 2026-11-26: ALTER TABLE のガイドと演習10問を追加（一覧ページにも項目が増えた）。create-table から alter-table へリンク。
-  '/sql/': '2026-11-26',
-  '/practice/': '2026-11-26',
-  '/sql/create-table/': '2026-11-26',
-  '/sql/alter-table/': '2026-11-26',
-  '/practice/alter-table/': '2026-11-26',
-  ...Object.fromEntries(Array.from({ length: 10 }, (_, index) => [`/practice/alter-table/alter-table-${String(index + 1).padStart(2, '0')}/`, '2026-11-26'])),
+  ...Object.fromEntries(revisedOnNov26.map((path) => [path, '2026-11-26'])),
 };
+
+export function lastModified(path: string) {
+  return updatedPaths[path] ?? DEFAULT_LASTMOD;
+}
 
 export function GET({ site }: { site?: URL }) {
   const origin = site ?? new URL('https://sqlrenshu.com');
@@ -39,6 +52,6 @@ export function GET({ site }: { site?: URL }) {
     ...questions.map((question) => `/practice/${question.category}/${question.id}/`),
     ...postgresqlFeatures.map((feature) => `/postgresql/${feature.slug}/`),
   ];
-  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map((path) => `  <url><loc>${new URL(path, origin)}</loc><lastmod>${updatedPaths[path] ?? DEFAULT_LASTMOD}</lastmod></url>`).join('\n')}\n</urlset>`;
+  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map((path) => `  <url><loc>${new URL(path, origin)}</loc><lastmod>${lastModified(path)}</lastmod></url>`).join('\n')}\n</urlset>`;
   return new Response(body, { headers:{ 'Content-Type':'application/xml; charset=utf-8' } });
 }

@@ -24,6 +24,7 @@ const splitIdentifiers = (text: string) => text.split(/([A-Za-z_][A-Za-z0-9_]+)/
         <ul class="mt-1 list-disc space-y-1 pl-5">{question.requirements.map((requirement) => <li>{requirement}</li>)}</ul>
       </div>}
     </header>
+    <slot name="practice-data" />
 
     <div class="mt-6 overflow-hidden rounded-xl border border-line shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_28px_rgba(0,0,0,0.07)]" aria-label="SQLエディタ">
       <div class="flex flex-wrap items-center justify-end gap-3 border-b border-line bg-[#fafaf9] px-4 py-2.5">
@@ -90,6 +91,7 @@ const splitIdentifiers = (text: string) => text.split(/([A-Za-z_][A-Za-z0-9_]+)/
   import { bracketMatching, defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language';
   import { sql, PostgreSQL } from '@codemirror/lang-sql';
   import { QuestionDatabase, readablePostgresError } from '@/lib/pglite';
+  import { formatSqlValue } from '@/lib/formatSqlValue';
   import { gradeResult } from '@/lib/grader';
   import { loadProgress, markSolved, saveDraft } from '@/lib/progress';
   import type { Question } from '@/lib/types';
@@ -402,7 +404,7 @@ const splitIdentifiers = (text: string) => text.split(/([A-Za-z_][A-Za-z0-9_]+)/
       const thead = table.createTHead(); const headRow = thead.insertRow();
       result.columns.forEach((column) => { const th = document.createElement('th'); th.className = 'border-b border-line px-3 py-2 text-muted'; th.textContent = column; headRow.append(th); });
       const tbody = table.createTBody();
-      result.rows.forEach((row) => { const tr = tbody.insertRow(); result.columns.forEach((column) => { const td = tr.insertCell(); td.className = 'whitespace-pre-wrap border-b border-line px-3 py-2 font-mono text-xs'; const value = row[column]; td.textContent = value === null ? 'NULL' : value === '' ? "''（空文字）" : value instanceof Date ? value.toISOString().slice(0,10) : Array.isArray(value) ? `{${value.map((item) => item === null ? 'NULL' : typeof item === 'object' ? JSON.stringify(item) : String(item)).join(',')}}` : typeof value === 'object' ? JSON.stringify(value) : String(value); if (value === null) td.classList.add('italic','text-muted'); }); });
+      result.rows.forEach((row) => { const tr = tbody.insertRow(); result.columns.forEach((column) => { const td = tr.insertCell(); td.className = 'whitespace-pre-wrap border-b border-line px-3 py-2 font-mono text-xs'; const value = row[column]; td.textContent = formatSqlValue(value); if (value === null) td.classList.add('italic','text-muted'); }); });
       container.append(table);
     }
 

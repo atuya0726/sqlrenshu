@@ -11,7 +11,7 @@
 
 - 公開: https://sqlrenshu.com/ 。問題379、ガイド51、PostgreSQL 固有機能5、ほか一覧と必須ページ。
 - 計測: Search Console と Cloudflare Web Analytics をスキルで取得できる。Web Analytics は 9月から計測されている。
-- 収益: AdSense は審査待ち。広告枠（AdSlot）とアフィリエイト（affiliateOffers）は枠だけで中身なし。
+- 収益: 11/13 申請の AdSense は「有用性の低いコンテンツ」で不承認。広告は無効で、枠とラベルも出力しない。
 - 必須ページ: `/about/`、`/privacy/`、`/contact/`。運営者名は「SQL練習室 運営者」、連絡先はメール。
 - 運用基盤: GitHub（`origin`、公開）。デプロイは一任。月曜と木曜の朝7時に launchd で無人実行。
 - インデックス: 個別の問題ページは 9/16 版で noindex だった。新版で外したが、Google の再クロール待ち（11/16 時点。数は「ログ」）。新しいガイド34本は Google にまだ認識されていない。
@@ -42,13 +42,13 @@
 | 2026-11-21 | `/sql/union/` | 4節を追加（出所の列、結合後の GROUP BY、重複の件数、実行計画で見る UNION と UNION ALL の差）。途中に ORDER BY を書いたときのエラー例、NULL の Tips、FAQ 1件 | 「union all」（実施前は表示19、順位8.0）。ページ全体は表示53、順位9.9 | 2026-12-19 | |
 | 2026-11-21 | `/sql/distinct/`（新規）、`/practice/distinct/`（8問） | DISTINCT の専用ガイドを新設（複数列、NULL、COUNT(DISTINCT)、ORDER BY、GROUP BY との違い、DISTINCT ON）。`/postgresql/distinct-on/` へリンク | インデックスされるか、表示回数、出る検索語（sql distinct、複数カラム、count distinct） | 2026-12-19 | |
 | 2026-11-26 | `/sql/alter-table/`（新規）、`/practice/alter-table/`（10問）、`/sql/create-table/`（関連構文と FAQ から誘導） | ALTER TABLE のガイドを新設（13節。列の追加、DEFAULT・NOT NULL 付きの追加、列の位置、削除、型と桁数の変更、USING、名前の変更、NOT NULL、DEFAULT、制約の追加と削除、複数の変更）。エラー例9件。演習は変更後の表の定義で採点 | 競合9本に実行環境と練習問題が無いテーマ。インデックスされるか、表示回数、出る検索語（alter table、カラム追加、add column、型変更、桁数変更、drop column、not null） | 2026-12-24 | |
+| 2026-11-26 | 問題379ページとガイド56ページ | 問題の入力データと模範解答の結果を静的HTMLに掲載。無効な広告枠を除き、ガイドに更新日を表示 | 個別問題のインデックス数と検索表示 | 2026-12-24 | |
 
 ## ユーザーに依頼中
 
-- [ ] AdSense の審査結果を知らせる（2026-11-13 に申請。`ads.txt` と所有権確認の meta タグは設置済み）
+- [ ] 11/30 以降にインデックス状況を再計測し、その結果を見てユーザーが AdSense の再申請を判断する。
 - [ ] Search Console の URL 検査で、`/sql/case/`、`/sql/inner-join/`、`/sql/select/`、`/sql/window-functions/` のインデックス登録をリクエストする。余裕があれば「検出 - インデックス未登録」の `/sql/where/`、`/sql/having/`、`/sql/left-join/` も
 - [ ] Search Console の「サイトマップ」で `https://sqlrenshu.com/sitemap.xml` を送信し直す（Google が読んだのは 11/13 の176件の版。今は460件で lastmod 付き）。同じ画面で、エラーになっている `https://www.sqlrenshu.com/sitemap.xml` を削除する
-- [ ] Cloudflare ダッシュボードの「Workers & Pages → sqlrenshu → 設定 → ドメインとルート」で、`workers.dev` とプレビュー URL が「無効」になっているかを見る（11/19 に設定ファイルで無効化してデプロイ済み。エージェントは workers.dev の URL を知らないため、外からの確認ができていない）
 - [ ] ASP に登録する（A8.net、もしもアフィリエイト、Amazon アソシエイト）
 - [ ] Zenn / Qiita / X への投稿をするか決める（下書きはエージェントが作る）
 
@@ -89,3 +89,4 @@
 - 2026-11-26: 実装の回。直近7日は PV 1430、訪問154（11/23 の記録は 1134、93）。訪問は 11/24 が41、11/25 が50で、それまでの1日10〜17から増えた。流入元に classroom.google.com（訪問14）が初めて出た。検索（10/27〜11/23）はクリック37、表示715、平均順位8.8。表示は 11/20〜22 に1日12〜23まで落ち、11/23 は87に戻った。
 - 2026-11-26: 仕様1を実装し、`/sql/alter-table/`（13節、エラー例9件、Tips 3件）と演習10問を本番に出した。公式（current は 19）で裏取りし、公式に記述の無い「追加した列は末尾に付く」とエラー文は PGlite（17.5）の実行で確かめた。仕様の SET NOT NULL と SET DEFAULT は2節に分けた。演習は8問の目安に対して10問（要素8、章末、まとめ）。テスト1135件合格。実ブラウザでの採点操作は確かめていない（採点の仕組みは create-table と同じ）。
 - 2026-11-26: 次回（11/30 月）は調査の回。週次の数字、インデックス状況の再計測（バックログ1）、classroom.google.com からの流入の中身（どのページに来ているか）、次の仕様づくり。残っている仕様は `/sql/insert/` の加筆1件。
+- 2026-11-26: 11/13 申請の AdSense が「有用性の低いコンテンツ」で不承認。Google から個別ページへの指摘はなく、問題ページの静的な本文量は要因の推定。全379問に PGlite から取得した表と期待結果を掲載し、無効な広告枠を除いた。SQLガイド51本と固有機能ガイド5本の更新日を sitemap と共通化し、検証方針を about に集約。トップに SELECT の演習一覧へのリンクを追加。旧 workers.dev URL は外部から HTTP 404（Cloudflare 1042）を確認。再申請は11/30以降のインデックス再計測後にユーザーが判断する。
