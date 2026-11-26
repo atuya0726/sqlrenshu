@@ -41,7 +41,7 @@ export const entries = buildExerciseEntries({
       columns: ['cont', 'disc'],
       rows: [[435000, 420000]],
       hint: '補間しないほうの関数名はpercentile_discです。',
-      explanation: 'CONTは420000と450000の間を補間して435000、DISCは0.5以上になる最初の値の420000を返します。',
+      explanation: 'CONTは420000と450000の間を補間して435000、DISCは0.5以上になる最初の値の420000を返します。開発の給与は4件なので、中央は2つの値の間にあります。実在する給与額を返したいときには、補間して新しい額を作るCONTを使うと目的が変わります。',
     },
     {
       slug: 'median-by-dept',
@@ -51,7 +51,7 @@ export const entries = buildExerciseEntries({
       columns: ['dept', 'percentile_cont'],
       rows: [['営業', 300000], ['開発', 435000]],
       hint: '集約関数なので、部署ごとに求めるにはGROUP BYを使います。',
-      explanation: '営業は5件の3番目で300000、開発は4件の補間で435000です。',
+      explanation: '営業は5件の3番目で300000、開発は4件の補間で435000です。WITHIN GROUPのORDER BYは中央値を探すために給与を並べます。部署ごとに1つずつ中央値を出すにはGROUP BYも必要で、省くと全部署で1つの値になります。',
     },
     {
       slug: 'average-vs-median',

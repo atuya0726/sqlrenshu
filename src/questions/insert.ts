@@ -95,7 +95,7 @@ const exercises: Exercise[] = [
     "description": "productsに、id 4の「定規」（価格150、在庫30）と、id 5の「付箋」（価格100、在庫20）を、1つのINSERT文で追加してください。",
     "sql": "INSERT INTO products (id, name, price, stock)\nVALUES\n  (4, '定規', 150, 30),\n  (5, '付箋', 100, 20);",
     "hint": "VALUESの後に、カッコで囲んだ行をカンマで区切って並べます。",
-    "explanation": "1つの文で2行が追加され、productsは5行になります。",
+    "explanation": "1つの文で2行が追加され、productsは5行になります。VALUESの後では、1組の括弧が1商品に対応します。定規と付箋の値を同じ括弧に並べると、指定した4列と値の数が合いません。",
     "starter": "INSERT INTO products (id, name, price, stock)\nVALUES ;",
     "columns": [
       "id",

@@ -60,7 +60,7 @@ const exercises: Exercise[] = [
     "description": "productsのid 1（ノート）の価格を250、在庫を40に、1つのUPDATE文で更新してください。",
     "sql": "UPDATE products\nSET price = 250, stock = 40\nWHERE id = 1;",
     "hint": "SETの中で、列の代入をカンマで区切ります。",
-    "explanation": "ノートの価格と在庫が同時に変わります。",
+    "explanation": "ノートの価格と在庫が同時に変わります。SETの後にpriceとstockへの代入をカンマで並べると、同じ行の2列を更新できます。WHEREでidを指定し忘れると、ほかの商品にも同じ価格と在庫が入ります。",
     "starter": "UPDATE products\nSET price = 250\nWHERE id = 1;",
     "columns": [
       "id",

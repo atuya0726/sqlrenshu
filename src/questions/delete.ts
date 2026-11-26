@@ -54,7 +54,7 @@ const exercises: Exercise[] = [
     "description": "productsのうち在庫が0の商品をすべて削除してください。",
     "sql": "DELETE FROM products\nWHERE stock = 0;",
     "hint": "WHEREには、複数行に合う条件を書きます。",
-    "explanation": "消しゴムと付箋の2行が削除され、ノート、ペン、定規が残ります。",
+    "explanation": "消しゴムと付箋の2行が削除され、ノート、ペン、定規が残ります。stockが0の行は複数あっても、1つのWHERE条件で選べます。WHEREを省くと在庫のある商品まで削除されます。",
     "starter": "DELETE FROM products\nWHERE ;",
     "columns": [
       "id",

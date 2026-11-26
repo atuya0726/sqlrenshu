@@ -18,7 +18,7 @@ export const entries = buildExerciseEntries({
       columns: ['id', 'name', 'closed'],
       rows: [[3, '総務', false], [4, '人事', true], [5, '資材', true]],
       hint: 'WHERE id NOT IN (...)に、除きたいidを並べます。',
-      explanation: 'idが1の営業と2の開発は候補に含まれるので外れ、3・4・5のチームが残ります。',
+      explanation: 'idが1の営業と2の開発は候補に含まれるので外れ、3・4・5のチームが残ります。NOT INでは、候補のどちらにも一致しないチームが残ります。「1と異なる、または2と異なる」とすると、1も2も片方の条件を満たして残ってしまいます。',
     },
     {
       slug: 'not-in-null-list',

@@ -63,7 +63,7 @@ export function coalesceEntries(previousCaseEmployees: string): Entry[] {
       description: '未入力の賞与を計算対象から除き、入力されている賞与の平均を1列で取得してください。0万円は計算に含めます。別名は付けません。',
       sql: 'SELECT AVG(bonus)\nFROM employees;', columns: ['avg'], rows: [[120]],
       hint: 'AVGはNULLを除いて平均を計算します。',
-      explanation: '入力済みの120、0、240の3件を平均すると、360 ÷ 3で120万円です。',
+      explanation: '入力済みの120、0、240の3件を平均すると、360 ÷ 3で120万円です。AVGはNULLの行を分母からも除きます。先にCOALESCEでNULLを0に置き換えると分母が5人になり、未入力の2人まで平均に含まれます。',
     },
     {
       slug: 'avg-coalesce-inside', title: 'AVGの内側のCOALESCE',

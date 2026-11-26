@@ -70,7 +70,7 @@ export function intersectExceptEntries(previousCommerce: string): Entry[] {
       ]
     ],
     "hint": "ALLを付けると共通する重複件数も残ります。",
-    "explanation": "顧客1は3件と2件の小さい方で2行、NULLは1件と2件の小さい方で1行です。"
+    "explanation": "顧客1は3件と2件の小さい方で2行、NULLは1件と2件の小さい方で1行です。ALLを省くと重複が取り除かれ、両方の表に複数回現れる顧客1も1行だけになります。"
   },
   {
     "slug": "remaining-row-counts",

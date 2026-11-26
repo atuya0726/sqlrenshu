@@ -28,7 +28,7 @@ export const entries = buildExerciseEntries({
       rows: [[1, 1200.5], [2, 300], [3, 80.25]],
       ordered: true,
       hint: '列名の後ろに::と型名を続けます。',
-      explanation: '1200.50は数値の1200.5、300は300、80.25は80.25になります。',
+      explanation: '1200.50は数値の1200.5、300は300、80.25は80.25になります。priceには小数点を含む文字列が入っているため、変換先には小数を扱えるnumericを指定します。整数型への直接変換は、小数点を含む行でエラーになります。',
     },
     {
       slug: 'text-to-date',
@@ -39,7 +39,7 @@ export const entries = buildExerciseEntries({
       rows: [[1, '2026-02-04'], [2, '2026-03-12'], [3, '2026-02-19']],
       ordered: true,
       hint: '文字列のまま足し算はできません。先にdate型へ変換します。',
-      explanation: '1月5日の30日後は2月4日、2月10日の30日後は3月12日、1月20日の30日後は2月19日です。',
+      explanation: '1月5日の30日後は2月4日、2月10日の30日後は3月12日、1月20日の30日後は2月19日です。orderedはtext型なので、日数を足す前にdate型に変換します。1か月後を求めると、月の日数によって30日後とは異なる日になります。',
     },
     {
       slug: 'ratio-numeric',
@@ -60,7 +60,7 @@ export const entries = buildExerciseEntries({
       rows: [['青木', 0.7], ['北野', 0.89], ['中央', 0.33], ['大和', 1]],
       ordered: true,
       hint: 'ROUNDの第1引数に、numericへ変換した割り算を渡します。',
-      explanation: '青木は0.70、北野は0.888…を丸めて0.89、中央は0.333…を丸めて0.33、大和は1です。',
+      explanation: '青木は0.70、北野は0.888…を丸めて0.89、中央は0.333…を丸めて0.33、大和は1です。correctとtotalはどちらも整数で、そのまま割ると小数部分が切り捨てられます。割り算の前に片方をnumericに変えると、残った小数をROUNDで丸められます。',
     },
     {
       slug: 'chapter-review-order-amount',
