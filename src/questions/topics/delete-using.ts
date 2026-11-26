@@ -1,6 +1,6 @@
 import { buildExerciseEntries, type Exercise } from '../exerciseEntries';
 
-const setup = "CREATE TABLE authors (id integer PRIMARY KEY, name text NOT NULL, status text NOT NULL);\nINSERT INTO authors VALUES (1, '佐藤', 'active'), (2, '鈴木', 'banned'), (3, '田中', 'active'), (4, '高橋', 'banned'), (5, '伊藤', 'active');\nCREATE TABLE posts (id integer PRIMARY KEY, author_id integer, title text NOT NULL, views integer NOT NULL);\nINSERT INTO posts VALUES (1, 1, 'はじめに', 500), (2, 2, '特売', 30), (3, 2, '再入荷', 150), (4, 3, 'レビュー', 80), (5, 4, '広告', 20), (6, NULL, '匿名', 60), (7, 1, '続き', 40), (8, 3, '質問', 200);\nCREATE TABLE reports (post_id integer NOT NULL, reason text NOT NULL);\nINSERT INTO reports VALUES (2, 'スパム'), (2, '不適切'), (3, '誤情報'), (3, '不適切'), (4, 'スパム'), (5, 'スパム'), (6, '誤情報'), (9, 'スパム');";
+const setup = "CREATE TABLE authors (id integer PRIMARY KEY, name text NOT NULL, status text NOT NULL);\nINSERT INTO authors VALUES (1, '佐藤', 'active'), (2, '鈴木', 'banned'), (3, '田中', 'active'), (4, '高橋', 'banned'), (5, '伊藤', 'active');\nCREATE TABLE posts (id integer PRIMARY KEY, author_id integer, title text NOT NULL, views integer NOT NULL);\nINSERT INTO posts VALUES (1, 1, 'はじめに', 500), (2, 2, '特売', 30), (3, 2, '再入荷', 150), (4, 3, 'レビュー', 80), (5, 4, 'お知らせ', 20), (6, NULL, '匿名', 60), (7, 1, '続き', 40), (8, 3, '質問', 200);\nCREATE TABLE reports (post_id integer NOT NULL, reason text NOT NULL);\nINSERT INTO reports VALUES (2, 'スパム'), (2, '不適切'), (3, '誤情報'), (3, '不適切'), (4, 'スパム'), (5, 'スパム'), (6, '誤情報'), (9, 'スパム');";
 
 const exercises: Exercise[] = [
   {
@@ -165,7 +165,7 @@ const exercises: Exercise[] = [
       [
         5,
         4,
-        "広告",
+        "お知らせ",
         20
       ],
       [
@@ -324,7 +324,7 @@ const exercises: Exercise[] = [
       [
         5,
         4,
-        "広告",
+        "お知らせ",
         20
       ],
       [
